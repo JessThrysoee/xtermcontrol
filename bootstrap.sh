@@ -23,4 +23,4 @@ tests/Makefile.in
 rm -rf a.out.dSYM
 rm -rf autom4te.cache
 
-#autoreconf -fi
+autoreconf -fi

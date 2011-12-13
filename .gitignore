@@ -16,6 +16,15 @@ doc/Makefile
 doc/Makefile.in
 tests/Makefile
 tests/Makefile.in
-a.out.dSYM/
-autom4te.cache/
+a.out.dSYM
+autom4te.cache
+depcomp
+src/.deps
+doc/xtermcontrol.1
+src/configuration.o
+src/getopt.o
+src/getopt1.o
+src/xtermcontrol
+src/xtermcontrol.o
+tests/xtermcontrol.sh
 
