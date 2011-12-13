@@ -1,0 +1,309 @@
+
+if test ! -x $XTC
+then
+   echo "$XTC: no such file or directory"
+   exit 1
+fi
+
+Main() {
+   ForeAndBackgroundColorTest
+   CursorAndMouseColorTest
+   ColorTest
+   FontTest
+   TitleTest
+   RawTest
+   WindowTest
+   GeometryTest
+   HelpAndVersionTest
+   ResetTest
+   :
+}
+
+SettingsSave() {
+   printf "\n%s\n" "Saving Current XTerm Settings:"
+
+   FOREGROUND=`$XTC --get-fg`
+   printf "%18s: %s\n" "FOREGROUND" "$FOREGROUND"
+
+   BACKGROUND=`$XTC --get-bg`
+   printf "%18s: %s\n" "BACKGROUND" "$BACKGROUND"
+
+   CURSOR=`$XTC --get-cursor`
+   printf "%18s: %s\n" "CURSOR" "$CURSOR"
+
+   MOUSE_FOREGROUND=`$XTC --get-mouse-fg`
+   printf "%18s: %s\n" "MOUSE_FOREGROUND" "$MOUSE_FOREGROUND"
+
+   MOUSE_BACKGROUND=`$XTC --get-mouse-bg`
+   printf "%18s: %s\n" "MOUSE_BACKGROUND" "$MOUSE_BACKGROUND"
+
+   FONT=`$XTC --get-font`
+   printf "%18s: %s\n" "FONT" "$FONT"
+
+   TITLE=`$XTC --get-title`
+   printf "%18s: %s\n" "TITLE" "$TITLE"
+
+   GEOMETRY=`$XTC --get-geometry`
+   printf "%18s: %s\n" "GEOMETRY" "$GEOMETRY"
+
+   HIGHLIGHT=`$XTC --get-highlight`
+   printf "%18s: %s\n" "HIGHLIGHT" "$HIGHLIGHT"
+
+   for i in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+   do
+      COLOR=`$XTC --get-color$i`
+      COLORS=$COLORS\ $COLOR
+      printf "%18s: %s\n" "COLOR$i" "$COLOR"
+   done
+}
+
+SettingsRestore() {
+
+   test -n "$FOREGROUND"       && OPT="$OPT --fg=\"$FOREGROUND\""
+   test -n "$BACKGROUND"       && OPT="$OPT --bg=\"$BACKGROUND\""
+   test -n "$CURSOR"           && OPT="$OPT --cursor=\"$CURSOR\""
+   test -n "$MOUSE_FOREGROUND" && OPT="$OPT --mouse-fg=\"$MOUSE_FOREGROUND\""
+   test -n "$MOUSE_BACKGROUND" && OPT="$OPT --mouse-bg=\"$MOUSE_BACKGROUND\""
+   test -n "$FONT"             && OPT="$OPT --font=\"$FONT\""
+   test -n "$TITLE"            && OPT="$OPT --title=\"$TITLE\""
+   test -n "$GEOMETRY"         && OPT="$OPT --geometry=\"$GEOMETRY\""
+
+   if test -n "$COLORS"
+   then
+      i=0
+      for COLOR in $COLORS
+      do
+         OPT="$OPT --color$i=\"$COLOR\""
+         i=`expr $i + 1`
+      done
+   fi
+
+   eval $XTC $OPT
+}
+
+ForeAndBackgroundColorTest() {
+   printf "\n%s\n" "Foreground and Background Color Test:"
+
+   for i in 0 1 2 3 4 5 6 7
+   do
+      if expr 7 - $i > /dev/null
+      then
+         j=`expr 7 - $i`
+      else
+         j=0
+      fi
+      eval FG=\$COLOR_$j
+      eval BG=\$COLOR_$i
+
+      printf "  %s %-14s %s\n" `basename $XTC` "--fg=\"$FG\"" "--bg=\"$BG\""
+      $XTC --fg="$FG" --bg="$BG"
+      sleep 1
+   done
+
+   ## reset to user prefs.
+   $XTC --fg=$FOREGROUND --bg=$BACKGROUND
+}
+
+CursorAndMouseColorTest() {
+   printf "\n%s\n" "Cursor and Mouse Pointer Color Test:"
+
+   for i in 0 1 2 3 4 5 6 7
+   do
+      if expr 7 - $i > /dev/null
+      then
+         j=`expr 7 - $i`
+      else
+         j=0
+      fi
+      eval FG=\$COLOR_$j
+      eval BG=\$COLOR_$i
+
+      printf "  %s %-20s %-20s %s\n" `basename $XTC` \
+             "--mouse-fg=\"$FG\"" "--mouse-bg=\"$BG\"" "--cursor=\"$FG\""
+      $XTC --mouse-fg="$FG" --mouse-bg="$BG" --cursor="$FG" 
+      sleep 1
+   done
+
+   ## reset to user prefs.
+   $XTC --mouse-fg=$MOUSE_FOREGROUND\
+        --mouse-bg=$MOUSE_BACKGROUND\
+        --cursor=$CURSOR 
+}
+
+ColorTest() {
+   printf "\n%s\n" "Color Test..."
+
+   for i in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+   do
+      if expr $i / 8 > /dev/null
+      then
+         bold=`expr $i / 8`
+      else 
+         bold=0
+      fi
+
+      if expr $i % 8 > /dev/null
+      then
+         color=`expr $i % 8`
+      else
+         color=0
+      fi
+
+      j=$i
+      if test $j -lt 10
+      then
+         j="$j "
+      fi
+      $XTC --raw "\e[20G\e[$bold;3${color}m\e[40m  color$j  \e[0m\n"
+   done
+
+   sleep 1
+   for i in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+   do
+      j=$i
+      for COLOR in $COLORS
+      do
+         if expr \( $j + 1 \) % 16 > /dev/null
+         then
+            j=`expr \( $j + 1 \) % 16`
+         else
+            j=0
+         fi
+         $XTC --color$j="$COLOR"
+      done
+      sleep 1
+   done
+}
+
+
+FontTest() {
+   printf "\n%s\n" "Font Test..."
+
+   printf "  %s %s\n" `basename $XTC` "--font=\"8x13\""
+   $XTC --font="8x13"
+   sleep 2
+
+   ## reset to user prefs.
+   $XTC --font=$FONT
+}
+
+TitleTest() {
+   printf "\n%s\n" "Xterm Window Title Test..."
+
+   max=8; i=0
+   while test $i -lt $max
+   do
+      printf "  %d\r" `expr $max - $i`
+      $XTC --title="`date`"
+      i=`expr $i + 1`
+      sleep 1
+   done
+
+   ## reset to user prefs.
+   $XTC --title=$TITLE
+}
+
+RawTest() {
+   printf "\n%s\n" "Raw Test:"
+
+# To make up for the shortcomming of xtermcontrol not having an option for the
+# wierd control sequence your desprately need, the raw option lets you issue any
+# sequence from the ctlseq.ms
+
+   PrintStatus() {
+
+      STATUS="$1"
+      xtc="$XTC --raw"
+
+      COL=60
+      GOTO_COL="\e[${COL}G"
+      GREEN="\e[1;32m"
+      RED="\e[1;31m"
+      NORM="\e[0m"
+
+      if test "$STATUS" = "OK"
+      then
+         $xtc "${GOTO_COL}[  ${GREEN}${STATUS}${NORM}  ]\n"
+      elif test "$STATUS" = "FAILED"
+      then
+         $xtc "${GOTO_COL}[${RED}${STATUS}${NORM}]\n"
+      else
+         $xtc "\nUsage: $FUNCNAME 'OK'|'FAILED'\n"
+      fi
+   }
+
+   $XTC --raw "  Starting Service mydaemond:"
+   PrintStatus "OK"
+
+   $XTC --raw "  Starting Service mydaemond:"
+   PrintStatus "FAILED"
+
+   sleep 1
+}
+
+WindowTest() {
+   printf "\n%s\n" "Window Test:"
+   
+   for i in maximize restore iconify de-iconify lower raise
+   do
+      printf "  %s %s\n" `basename $XTC` "--$i"
+      $XTC --$i
+      sleep 1
+   done
+}
+
+GeometryTest() {
+   printf "\n%s\n" "Geometry Test:"
+
+   $XTC --geometry="50x200+100+0"
+   sleep 1
+   $XTC --geometry="200x19+0+100"
+   sleep 1
+   $XTC --geometry="50x19+100+100"
+   sleep 1
+   $XTC --geometry="50x19+500+100"
+   sleep 1
+   $XTC --geometry="50x19+500+400"
+   sleep 1
+   $XTC --geometry="50x19+100+400"
+   sleep 1
+   $XTC --geometry="50x19+100+100"
+   sleep 1
+   $XTC --geometry="20x5+0+0"
+   sleep 1
+
+   ## reset to user prefs.
+   $XTC --geometry=$GEOMETRY
+   clear
+}
+
+HelpAndVersionTest() {
+   printf "\n%s\n" "Help and Version Message Test:"
+
+   sleep 1
+   echo "--- Begin Version Message --------------------------------------------"
+   $XTC --version
+   sleep 1
+   printf "\n"
+   echo "--- Begin Help Message -----------------------------------------------"
+   $XTC --help
+}
+
+ResetTest() {
+   printf "\n%s\n" "Reset Test (in 3 seconds):"
+   sleep 3
+   $XTC --reset
+}
+
+COLOR_0="black"
+COLOR_1="red"
+COLOR_2="green"
+COLOR_3="yellow"
+COLOR_4="blue"
+COLOR_5="magenta"
+COLOR_6="cyan"
+COLOR_7="white"
+
+trap 'SettingsRestore; exit' 0 1 2 5 15
+SettingsSave
+Main

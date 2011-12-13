@@ -1,0 +1,144 @@
+2009-10-16  Jess Thrysoee
+
+   * Version 2.10
+
+   * doc/xtermcontrol.roff: Update troubleshooting section. Add list
+	of which xtermcontrol options are effected by which of the three
+	xterm resources allowWindowOps, allowTitleOps, and allowFontOps.
+	All of these resorces can be changed in the xterm ctrl+rightclick
+	menu, or persistently in ~/.Xdefaults, to avoid xtermcontrol hangs.
+
+   * all: remove compile warnings.
+
+2007-09-03  Jess Thrysoee
+
+   * Version 2.9
+
+   * doc/xtermcontrol.roff: Add note that xterm resource allowWindowOps
+	should be set true, to allow xtermcontrol to use extended window
+	control sequences, and avoid that it hangs.
+
+2006-02-04  Jess Thrysoee
+
+   * Version 2.8
+
+   * src/configuration.c: Fix regexp, so the '#rrggbb' way to specify a
+	color works in configuration file. Reported by Olle Mulmo.
+
+   * doc/xtermcontrol.roff: add BUGS section describing how install needs
+	to setuid root on some broken systems.
+
+2004-12-22  Jess Thrysoee
+
+   * Version 2.7
+
+   * configure.ac, src/Makefile.am: remove all dependencies on Xlib.
+	Reported by Rich Paul.
+
+2004-10-11  Jess Thrysoee
+
+   * Version 2.6
+
+   * src/xtermcontrol.c: rewrite of --get-* methods. On Cygwin chars are simply
+   read (VMIN=)1 at a time.
+
+   *config.guess, config.sub: removed. No need for specific Cygwin test.
+
+   * all: remove --get-raw option. 
+
+2004-10-03  Jess Thrysoee
+
+   * Version 2.5
+
+   * configure.ac: update autotool scripts.
+
+   * all: remove --timeout option. Use VMIN=1 && VTIME=1, this blocks until at
+   least one char is available and makes --get-* much faster.
+   
+   Cygwin does not seem to get this right, as it reads only one char before
+   blocking again, i.e. it uses VMIN as the maximum of chars to read in raw
+   mode. The workaround is to set VMIN=0 and read nonblocking after a fixed
+   timeout. Patch by Mark Paulus.
+
+2004-04-21  Jess Thrysoee
+
+   * Version 2.4
+
+   * doc/xtermcontrol.roff, src/xtermcontrol.h, doc/xtermcontrol.roff: Added
+   new option: --timeout
+
+   * doc/ctlseqs.ms, doc/ctlseqs.txt: updated from xterm-186
+
+2004-01-07  Jess Thrysoee
+
+   * Version 2.3
+
+   * src/xtermcontrol.h: don't include X11/Xlib.h, it not needed.
+
+   * doc/xtermcontrol.roff, src/xtermcontrol.c, src/configuration.c,
+   src/xtermcontrol.h, src/configuration.h: Update Copyright year. 
+
+   * doc/xtermcontrol.roff: update documentation of the --font option with the
+   syntax of how to access the fontmenu.
+
+   NOTE: The implementation of the negative relative size fontmenu navigation
+   at xterm patch level #184 has a typo preventing it from working correctly.
+   This has been reported to the xterm maintainer.
+
+2003-09-07  Jess Thrysoee
+
+   * Version 2.2
+
+   * src/configuration.c, src/xtermcontrol.c: compile without errors and
+   warnings with g++
+
+2003-08-17  Jess Thrysoee
+
+   * Version 2.1 (only one minor version number is needed)
+
+   * geometry.c: Source file removed. As of xterm patch #168 the window
+   position bug has been fixed, so the Xlib workaround is no longer needed.
+
+   * all: Added new options: --[get-]colorN
+                             --[get-]highlight
+                             --force
+                             --reset
+                             --get-raw
+
+   NOTE: Setting highlight does not work at xterm patch level #179. A patch
+   for this has been accepted by the xterm maintainer, so presumably, it
+   should be fixed in the next release, i.e. #180.
+
+2002-10-26  Jess Thrysoee
+
+   * Version 2.0.2
+
+   * src/configuration.c: Problem: configuration files take no effect.
+   Solution: remove newline from fgets input when reading key/value pairs
+   from configuration file.
+
+   * src/xtermcontrol.c: remove trailing whitespace from configuration file
+
+
+2002-10-20  Jess Thrysoee
+
+   * Version 2.0.1
+
+   * src/configuration.c: included OpenPKG.org patch.
+
+   * configure.in: exit configure when X libs/includes not located
+
+   * doc/xtermcontrol.spec: added rpm spec file.
+
+2002-09-19  Jess Thrysoee
+
+   * Version 2.0.0
+
+   * all: Complete rewrite. Rename project from xtermcolors
+   to xtermcontrol.
+
+2002-05-18  Jess Thrysoee
+
+   * Version 1.0.0
+
+   * all: Initial version.

@@ -1,0 +1,235 @@
+.SH NAME
+.\" the x macro is the package name
+\*x \- dynamic control of XFree86 xterm properties.
+.\"
+.\"   "SYNOPSIS"
+.\"
+.SH SYNOPSIS
+.B \*x
+.RI [OPTIONS] ...
+.\"
+.\"   "DESCRIPTION"
+.\"
+.SH DESCRIPTION
+.B \*x
+makes it easy to change colors, title, font and geometry of a running XFree86 
+\fBxterm(1)\fR, as well as to report the current settings of the aforementioned
+properties.
+
+Window manipulations de\-/iconify, raise/lower, maximize/restore and reset
+are also supported.
+
+To complete the feature set; \*x lets advanced users issue any xterm control
+sequence of their choosing.
+.br
+.\"
+.\"   "OPTIONS"
+.\"
+.SH OPTIONS
+.IP "\fB\-\-fg\fR=\fICOLOR\fR"
+Set foreground color (see also \fBCOLOR NAMES\fR).
+.IP "\fB\-\-bg\fR=\fICOLOR\fR"
+Set background color.
+.IP "\fB\-\-color\fIN\fR=\fICOLOR\fR"
+Set N'th [0-15] color.
+.IP "\fB\-\-highlight\fR=\fICOLOR\fR"
+Set highlight color.
+.IP "\fB\-\-cursor\fR=\fICOLOR\fR"
+Set cursor color.
+.IP "\fB\-\-mouse\-fg\fR=\fICOLOR\fR"
+Set mouse pointer foreground color.
+.IP "\fB\-\-mouse\-bg\fR=\fICOLOR\fR"
+Set mouse pointer background color.
+.IP "\fB\-\-font\fR=\fIFONT\fR"
+Set font name (see also \fBFONT NAMES\fR). Alternatively it is possible to specify
+a fontmenu index as \'#[0-6]\' or navigate the fontmenu by
+relative sizes as \'#+N\' or \'#-N\', where N is an optional integer.
+.IP "\fB\-\-title\fR=\fISTRING\fR"
+Set window title. Note that mechanisms like the \fBbash(1)\fR
+PROMPT_COMMAND may overwrite the title.
+.IP "\fB\-\-geometry\fR=\fIWIDTHxHEIGHT+XOFF+YOFF\fR"
+Set size and/or position. Through its control sequences the xterm only
+recognize positive \fIXOFF\fR and \fIYOFF\fR offsets, which are pixels relative to the
+upper left hand corner of the display. \*x is therefore unable to
+handle negative offsets as described in the \fBX(7x)\fR GEOMETRY SPECIFICATIONS
+and therefore truncates negative values to zero.
+.IP "\fB\-\-get\-fg\fR"
+Report foreground color.
+.IP "\fB\-\-get\-bg\fR"
+Report background color.
+.IP "\fB\-\-get\-color\fIN\fR"
+Report N'th [0-15] color.
+.IP "\fB\-\-get\-highlight\fR"
+Report highlight color.
+.IP "\fB\-\-get\-cursor\fR"
+Report cursor color.
+.IP "\fB\-\-get\-mouse\-fg\fR"
+Report mouse pointer foreground color.
+.IP "\fB\-\-get\-mouse\-bg\fR"
+Report mouse pointer background color.
+.IP "\fB\-\-get\-font\fR"
+Report font.
+.IP "\fB\-\-get\-title\fR"
+Report window title.
+.IP "\fB\-\-get\-geometry\fR"
+Report size and position. The size of the text area is reported in characters and
+the position is reported in pixels relative to the upper left hand corner of the display.
+.IP "\fB\-\-maximize\fR"
+Maximize window.
+.IP "\fB\-\-restore\fR"
+Restore maximized window.
+.IP "\fB\-\-iconify\fR"
+Iconify window.
+.IP "\fB\-\-de\-iconify\fR"
+De\-iconify window.
+.IP "\fB\-\-raise\fR"
+Raise window.
+.IP "\fB\-\-lower\fR"
+Lower window.
+.IP "\fB\-\-reset\fR"
+Full reset.
+.IP "\fB\-\-raw\fR=\fICTLSEQS\fR"
+Issue raw control sequence (see also \fBXTERM CONTROL SEQUENCES\fR).
+.IP "\fB\-\-file\fR=\fIFILE\fR"
+Force \*x to read configurations (see also \fBCONFIGURATION\fR) from \fIFILE\fR
+instead of the standard personal initialization file ~/.\*x.
+.IP "\fB\-\-force\fR, \fB\-f\fR"
+Skip TERM environment variable check.
+.IP "\fB\-\-verbose\fR, \fB\-v\fR"
+Print verbose reports.
+.IP "\fB\-\-help\fR, \fB\-h\fR"
+Print help message and exit.
+.IP "\fB\-\-version\fR"
+Print the version number and exit.
+.\"
+.\"   "CONFIGURATION"
+.\"
+.SH CONFIGURATION
+\*x reads a default, ~/.\*x, or a user specified
+configuration file on startup.
+Each line in the file is either a comment or contains an attribute.
+Attributes consist of a keyword and an associated value:
+.nf
+.sp
+      keyword = value # comment
+.sp
+.fi
+The valid keyword/value combinations are:
+.nf
+.sp
+      foreground="COLOR"
+      background="COLOR"
+      highlight="COLOR"
+      cursor="COLOR"
+      mouse\-foreground="COLOR"
+      mouse\-background="COLOR"
+      geometry="WIDTHxHEIGHT+XOFF+YOFF"
+      font="FONT"
+      color0="COLOR"
+      color1="COLOR"
+      color2="COLOR"
+      color3="COLOR"
+      color4="COLOR"
+      color5="COLOR"
+      color6="COLOR"
+      color7="COLOR"
+      color8="COLOR"
+      color9="COLOR"
+      color10="COLOR"
+      color11="COLOR"
+      color12="COLOR"
+      color13="COLOR"
+      color14="COLOR"
+      color15="COLOR"
+.sp
+.fi
+Whitespace is ignored in attributes unless within a quoted value. The
+character \'#\' is taken to begin a comment. Each \'#\'
+and all remaining characters on that line is ignored.
+.\"
+.\"   "FONT NAMES"
+.\"
+.SH FONT NAMES
+\*x accepts any \fBX(7x)\fR FONT NAMES.
+Font names like \'-adobe-courier-medium-r-normal--10-100-75-75-m-60-iso8859-1\' are
+very cumbersome to write, so it is convenient to make use of aliases, e.g.
+\'fixed\' or \'8x13\', if present in fonts.alias files of the font directories.
+.\"
+.\"   "COLOR NAMES"
+.\"
+.SH COLOR NAMES
+\*x accepts any \fBX(7x)\fR COLOR NAMES.
+Basically this means that colors are specified by name or rgb value, e.g. \'blue\',
+\'rgb:0000/0000/FFFF\' or \'#00F\'. Colors are typically reported by the
+xterm in a device-dependent numerical form, e.g. \'rgb:0000/0000/FFFF\'.
+Note that old syntax rgb values should always be quoted to avoid \'#\' being
+interpreted as the beginning of a comment by the shell (see also \fBFILES\fR).
+.\"
+.\"   "XTERM CONTROL SEQUENCES"
+.\"
+.SH XTERM CONTROL SEQUENCES
+The secret behind \*x is xterm control sequences. All the possible
+(there are a plethora of them) control sequences are documented in ctlseqs.txt,
+found in the \fBxterm(1)\fR distribution (see also \fBFILES\fR). 
+.\"
+.\"   "BUGS"
+.\"
+.SH TROUBLESHOOTING
+If read/write permissions on the tty's are changed so
+that special group membership is required to be able to write to the pseudo terminal,
+the easiest workaround is to install \*x setuid root.
+
+\fBXterm(1)\fR has three resources, allowWindowOps, allowTitleOps, and
+allowFontOps, that enables or disables special operations which \*x relies on.
+If any of these resources are set (or defaults) to 'false' \*x may hang.
+The resources corresponds to \*x options as:
+.nf
+.sp
+   allowWindowOps:
+      --raise
+      --lower
+      --restore
+      --maximize
+      --iconify
+      --de-iconify
+      --get-title
+      --geometry
+      --get-geometry
+
+   allowTitleOps:
+      --title
+
+   allowFontOps:
+      --font
+      --get-font
+.sp
+.fi
+All three resources can usually be enabled for the current xterm session via a menu; ctrl+rightclick and look for menu item names like 'Allow Window Ops'. To set these resource values persistently you can add the following to either your local ~/.Xdefaults file, or to a system-wide resource file like /etc/X11/app-defaults/XTerm:
+.nf
+.sp
+   *VT100.allowWindowOps: true
+   *VT100.allowTitleOps: true
+   *VT100.allowFontOps: true
+.sp
+.fi
+.\"
+.\"   "FILES"
+.\"
+.SH FILES
+.IP <XRoot>/X11/rgb.txt
+Default rgb color name file location.
+.IP ctlseqs.txt
+Xterm control sequences documentation. Distributed with xterm from
+http://dickey.his.com/xterm/
+.\"
+.\"   "SEE ALSO"
+.\"
+.SH "SEE ALSO"
+.BR xterm(1),
+.B  X(7x)
+.\"
+.\"   "EOF"
+.\"
+.SH COPYRIGHT
+Copyright \(co 2002-2009 Jess Thrysoee <jess@thrysoee.dk>
+
