@@ -761,22 +761,43 @@ tty_read(char* output, size_t size)
 void
 csi_print1(int ctl1)
 {
-   snprintf(temp, sizeof(temp), "\033[%dt", ctl1);
-   raw_print(temp);
+   char* tmux;
+
+   if ((tmux = getenv("TMUX")) == NULL) {
+      snprintf(temp, sizeof(temp), "\033[%dt", ctl1);
+      raw_print(temp);
+   } else {
+      snprintf(temp, sizeof(temp), "\033Ptmux;\033\033[%dt\033\\", ctl1);
+      raw_print(temp);
+   }
 }
 
 void
 csi_print2(int ctl1, int ctl2)
 {
-   snprintf(temp, sizeof(temp), "\033[%d;%dt", ctl1, ctl2);
-   raw_print(temp);
+   char* tmux;
+
+   if ((tmux = getenv("TMUX")) == NULL) {
+      snprintf(temp, sizeof(temp), "\033[%d;%dt", ctl1, ctl2);
+      raw_print(temp);
+   } else {
+      snprintf(temp, sizeof(temp), "\033Ptmux;\033\033[%d;%dt\033\\", ctl1, ctl2);
+      raw_print(temp);
+   }
 }
 
 void
 csi_print3(int ctl1, int ctl2, int ctl3)
 {
-   snprintf(temp, sizeof(temp), "\033[%d;%d;%dt", ctl1, ctl2, ctl3);
-   raw_print(temp);
+   char* tmux;
+
+   if ((tmux = getenv("TMUX")) == NULL) {
+      snprintf(temp, sizeof(temp), "\033[%d;%d;%dt", ctl1, ctl2, ctl3);
+      raw_print(temp);
+   } else {
+      snprintf(temp, sizeof(temp), "\033Ptmux;\033\033[%d;%d;%dt\033\\", ctl1, ctl2, ctl3);
+      raw_print(temp);
+   }
 }
 
 void
@@ -809,18 +830,37 @@ get_title(char* title, size_t size, int verbose, int ctl1)
 void
 osc_print(int ps1, int ps2, char* pt)
 {
-   if (pt && *pt)
-      if (ps1 == 4)
-         /* colorN */
-         snprintf(temp, sizeof(temp), "\033]%d;%d;%s\007", ps1, ps2, pt);
+   char* tmux;
+   if ((tmux = getenv("TMUX")) == NULL) {
+      if (pt && *pt)
+         if (ps1 == 4)
+            /* colorN */
+            snprintf(temp, sizeof(temp), "\033]%d;%d;%s\007", ps1, ps2, pt);
+         else
+            snprintf(temp, sizeof(temp), "\033]%d;%s\007", ps1, pt);
       else
-         snprintf(temp, sizeof(temp), "\033]%d;%s\007", ps1, pt);
-   else
-      if (ps1 == 4)
-         /* colorN */
-         snprintf(temp, sizeof(temp), "\033]%d;%d;?\007", ps1, ps2);
-      else
-         snprintf(temp, sizeof(temp), "\033]%d;?\007", ps1);
+         if (ps1 == 4)
+            /* colorN */
+            snprintf(temp, sizeof(temp), "\033]%d;%d;?\007", ps1, ps2);
+         else
+            snprintf(temp, sizeof(temp), "\033]%d;?\007", ps1);
+   } else {
+      if (pt && *pt) {
+         if (ps1 == 4) {
+            /* colorN */
+            snprintf(temp, sizeof(temp), "\033Ptmux;\033\033]%d;%d;%s\007\033\\", ps1, ps2, pt);
+         } else {
+            snprintf(temp, sizeof(temp), "\033Ptmux;\033\033]%d;%s\007\033\\", ps1, pt);
+         }
+      } else {
+         if (ps1 == 4) {
+            /* colorN */
+            snprintf(temp, sizeof(temp), "\033Ptmux;\033\033]%d;%d;?\007\033\\", ps1, ps2);
+         } else {
+            snprintf(temp, sizeof(temp), "\033Ptmux;\033\033]%d;?\007\033\\", ps1);
+         }
+      }
+   }
 
    raw_print(temp);
 }
