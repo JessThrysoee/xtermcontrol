@@ -682,11 +682,28 @@ set_tty_restore(void)
       tcsetattr(TTY_FILENO, TCSAFLUSH, tty_ts_orig_pt);
 }
 
+/* In tmux, use DCS with a "tmux;" prefix to pass escape sequences through to the underlying terminal.
+   Escape characters in the sequences must be doubled. */
+char *
+tmux_dcs_passthrough(char *ctlseq)
+{
+   static char s[BUFSIZ];
+
+   if (getenv("TMUX")) {
+      snprintf(s, sizeof(s), "\033Ptmux;\033%s\033\\", ctlseq);
+      return s;
+   }
+
+   return ctlseq;
+}
+
 /* issue raw escape sequence */
 void
 raw_print(char* ctlseq)
 {
    int c;
+
+   ctlseq = tmux_dcs_passthrough(ctlseq);
 
    while ((c = *ctlseq++)) {
       if (c == '\\' && *ctlseq) {

@@ -1,3 +1,9 @@
+2013-04-26  Jess Thrysoee
+
+   * Version 2.11
+
+   * src/xtermcontrol.c: Add basic tmux support. Contributed by turlutux.
+
 2009-10-16  Jess Thrysoee
 
    * Version 2.10
