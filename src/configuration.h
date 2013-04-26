@@ -8,7 +8,7 @@
 ** the Free Software Foundation; either version 2 of the License, or
 ** (at your option) any later version.
 **
-****************************************************************************/
+***************************************************************************  */
 
 /* Configuration files must be plain ascii test file. Each line in the file is
  * either a comment or contains an attribute. Attributes consist of a keyword
@@ -40,33 +40,40 @@
  *       printf("found %s with value %s\n", lp->keyword, lp->value);
  *
  *    configuration_free(&list);
- */
+                                                                             */
 
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
-typedef struct configuration_element {
-   struct configuration_element* next;
-   char* keyword;
-   char* value;
+typedef struct configuration_element
+{
+   struct configuration_element *next;
+   char          *keyword;
+   char          *value;
+
 } configuration_element;
 
-typedef struct configuration {
-   struct configuration_element* first;
-   int n_elements;
+
+typedef struct configuration
+{
+   struct configuration_element *first;
+   int            n_elements;
+
 } configuration;
 
+
 /* configuration.c */
-extern void configuration_init(configuration* list);
-extern int configuration_read(configuration* list, const char* filepath);
-extern void configuration_free(configuration* list);
-extern const configuration_element* configuration_find(configuration* list, const char* keyword);
+void configuration_init(configuration * list);
+int configuration_read(configuration * list, const char *filepath);
+void configuration_free(configuration * list);
+const configuration_element *configuration_find(configuration * list, const char *keyword);
 
-/* something like the following function should be created to write the
- * configuration to a file, but it will always be very implementation specific,
- * so it is left to be done per project and not in this library.
+/*
+  Something like the following function should be created to write the
+  configuration to a file, but it will always be very implementation specific,
+  so it is left to be done per project and not in this library.
 
-extern int configuration_write(const char* filepath);
+      int configuration_write(const char* filepath);
 */
 
-#endif /* CONFIGURATION_H */
+#endif

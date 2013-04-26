@@ -8,7 +8,7 @@
 ** the Free Software Foundation; either version 2 of the License, or
 ** (at your option) any later version.
 **
-****************************************************************************/
+***************************************************************************  */
 
 #ifndef XTERMCONTROL_H
 #define XTERMCONTROL_H
@@ -87,48 +87,50 @@ enum OPTIONS
    FILE_CONF
 };
 
-/* xterm control sequences are described in ctlseq.ms, which is 
-   distributed with the xterm source package, obtainable from 
+/* xterm control sequences are described in ctlseq.ms, which is
+   distributed with the xterm source package, obtainable from
    http://dickey.his.com/xterm.
    To read the troff file as plain text, issue
-   "nroff -ms -t -c ctlseqs.ms | col -b > ctlseqs.txt" */
+   "nroff -ms -t -c ctlseqs.ms | col -b > ctlseqs.txt"                       */
 
-struct controlseqs {
-   int ctl1;           /* Ps */
-   int ctl2;           /* Ps */
-   char* text;         /* Pt */
-   int type;           /* CTLSEQS_TYPE */
-   char* conf_title;   /* used in reports and configuration file */
-   char* synopsis;     /* used in usage */
-   char* description;  /* used in usage and configuration file */
+struct controlseqs
+{
+   int            ctl1;         /* Ps                                        */
+   int            ctl2;         /* Ps                                        */
+   char          *text;         /* Pt                                        */
+   int            type;         /* CTLSEQS_TYPE                              */
+   char          *conf_title;   /* used in reports and configuration file    */
+   char          *synopsis;     /* used in usage                             */
+   char          *description;  /* used in usage and configuration file      */
 };
 
-extern void check_term_variable(void);
-extern void csi_print1(int ctl1);
-extern void csi_print2(int ctl1, int ctl2);
-extern void csi_print3(int ctl1, int ctl2, int ctl3);
+void check_term_variable(void);
+void csi_print1(int ctl1);
+void csi_print2(int ctl1, int ctl2);
+void csi_print3(int ctl1, int ctl2, int ctl3);
 
-extern void osc_print(int ps1, int ps2, char* pt);
+void osc_print(int ps1, int ps2, char *pt);
 
-extern void tty_control();
-extern char* ctty_path(void);
-extern void raw_print(char* ctlseq);
-extern int tty_read(char* output, size_t size);
+void tty_control();
+char *ctty_path(void);
+void raw_print(char *ctlseq);
+int tty_read(char *output, size_t size);
 
-extern void set_tty_raw();
-extern void set_tty_restore(void);
+char *tmux_dcs_passthrough(char *ctlseq);
+void set_tty_raw();
+void set_tty_restore(void);
 
-extern void get_title(char* title, size_t size, int verbose, int ctl1);
-extern void get_osc(char* osc, size_t size, int verbose, int option, int ctl1, int ctl2);
+void get_title(char *title, size_t size, int verbose, int ctl1);
+void get_osc(char *osc, size_t size, int verbose, int option, int ctl1, int ctl2);
 
-extern void set_geometry(int ctl1, int ctl2, char* geometry);
-extern void get_geometry(char* geometry, size_t size, int verbose, int ctl1, int ctl2);
+void set_geometry(int ctl1, int ctl2, char *geometry);
+void get_geometry(char *geometry, size_t size, int verbose, int ctl1, int ctl2);
 
-extern int configuration_write(const char* filepath);
+int configuration_write(const char *filepath);
 
-extern void usage(int status);
-extern void version(void);
+void usage(int status);
+void version(void);
 
-extern void do_exit(int status);
+void do_exit(int status);
 
-#endif /* XTERMCONTROL_H */
+#endif

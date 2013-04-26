@@ -8,7 +8,7 @@
 ** the Free Software Foundation; either version 2 of the License, or
 ** (at your option) any later version.
 **
-****************************************************************************/
+***************************************************************************  */
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -19,33 +19,49 @@
 
 #include "configuration.h"
 
-static void configuration_add(configuration* list, const char* keyword, const char* value);
-static void do_regerror(int errcode, const regex_t *preg);
+static void configuration_add(configuration * list, const char *keyword, const char *value);
+static void do_regerror(int errcode, const regex_t * preg);
 
-void
-configuration_init(configuration* list)
+
+/*=****************************************************************************
+**
+** DESCRIPTION :
+**
+** RETURN VALUE:
+**                                                                           */
+/*=***************************************************************************/
+void configuration_init(configuration * list)
 {
    list->n_elements = 0;
    list->first = NULL;
 }
 
-int
-configuration_read(configuration* list, const char* filepath)
+
+/*=****************************************************************************
+**
+** DESCRIPTION :
+**
+** RETURN VALUE:
+**                                                                           */
+/*=***************************************************************************/
+int configuration_read(configuration * list, const char *filepath)
 {
-   int errcode;
-   char temp[BUFSIZ];
-   size_t matchlen;
+   int            errcode;
+   char           temp[BUFSIZ];
+   size_t         matchlen;
 
-   FILE* stream;
-   char* value, *p;
-   char* keyword;
+   FILE          *stream;
+   char          *value,
+                 *p;
+   char          *keyword;
 
-   regex_t preg;
-   regmatch_t* pmatch;
-   const char* regex;
+   regex_t        preg;
+   regmatch_t    *pmatch;
+   const char    *regex;
 
    stream = fopen(filepath, "r");
-   if (stream == NULL) {
+   if (stream == NULL)
+   {
       return -1;
    }
 
@@ -60,52 +76,66 @@ configuration_read(configuration* list, const char* filepath)
     */
    regex = "^[ \t\"']*([^#]*[^ \t\"'#])[ \t\"']*=[ \t\"']*(#?[^\"'#]*)";
    errcode = regcomp(&preg, regex, REG_EXTENDED | REG_NEWLINE);
-   if (errcode) {
+   if (errcode)
+   {
       do_regerror(errcode, &preg);
       return -1;
    }
-   pmatch = (regmatch_t*) malloc(sizeof(regmatch_t) * (preg.re_nsub+1));
-   if (!pmatch) {
+   pmatch = (regmatch_t *) malloc(sizeof(regmatch_t) * (preg.re_nsub + 1));
+   if (!pmatch)
+   {
       fprintf(stderr, "out of memory\n");
       exit(8);
    }
 
-   while (fgets(temp, sizeof(temp), stream) != NULL) {
+   while (fgets(temp, sizeof(temp), stream) != NULL)
+   {
       /* fgets keeps the newline - delete it */
-      if((p = strchr(temp, '\n')) != NULL)
+      if ((p = strchr(temp, '\n')) != NULL)
+      {
          *p = '\0';
-      errcode = regexec(&preg, temp, (preg.re_nsub+1), pmatch, 0);
-      if (errcode) {
+      }
+      errcode = regexec(&preg, temp, (preg.re_nsub + 1), pmatch, 0);
+      if (errcode)
+      {
          /* line did not match */
          continue;
       }
       /* ignore pmatch[0] which is the entire match */
 
       /* keyword */
-      if (pmatch[1].rm_so != -1) {
+      if (pmatch[1].rm_so != -1)
+      {
          matchlen = pmatch[1].rm_eo - pmatch[1].rm_so;
-         keyword = (char*) malloc(matchlen+1);
-         if (!keyword) {
+         keyword = (char *) malloc(matchlen + 1);
+         if (!keyword)
+         {
             fprintf(stderr, "out of memory\n");
             exit(8);
          }
-         strncpy(keyword, temp+pmatch[1].rm_so, matchlen);
+         strncpy(keyword, temp + pmatch[1].rm_so, matchlen);
          keyword[matchlen] = '\0';
-      } else {
+      }
+      else
+      {
          fprintf(stderr, "missing keyword: %s\n", temp);
          continue;
       }
       /* value */
-      if (pmatch[2].rm_so != -1) {
+      if (pmatch[2].rm_so != -1)
+      {
          matchlen = pmatch[2].rm_eo - pmatch[2].rm_so;
-         value = (char*) malloc(matchlen+1);
-         if (!value) {
+         value = (char *) malloc(matchlen + 1);
+         if (!value)
+         {
             fprintf(stderr, "out of memory\n");
             exit(8);
          }
-         strncpy(value, temp+pmatch[2].rm_so, matchlen);
+         strncpy(value, temp + pmatch[2].rm_so, matchlen);
          value[matchlen] = '\0';
-      } else {
+      }
+      else
+      {
          fprintf(stderr, "missing value: %s\n", temp);
          free(keyword);
          keyword = NULL;
@@ -126,31 +156,46 @@ configuration_read(configuration* list, const char* filepath)
    return 0;
 }
 
-static void
-configuration_add(configuration* list, const char* keyword, const char* value)
+
+/*=****************************************************************************
+**
+** DESCRIPTION :
+**
+** RETURN VALUE:
+**                                                                           */
+/*=***************************************************************************/
+static void configuration_add(configuration * list, const char *keyword, const char *value)
 {
-   configuration_element* new_element;
+   configuration_element *new_element;
 
    /* check if keyword already exists */
-   new_element = (configuration_element*) configuration_find(list, keyword);
-   if (new_element) {
-      if (new_element->value) {
+   new_element = (configuration_element *) configuration_find(list, keyword);
+   if (new_element)
+   {
+      if (new_element->value)
+      {
          free(new_element->value);
          new_element->value = NULL;
       }
-   } else {
+   }
+   else
+   {
       /* allocate mem for the struct */
-      new_element = (configuration_element*) malloc(sizeof(configuration_element));
-      if (!new_element) {
+      new_element = (configuration_element *) malloc(sizeof(configuration_element));
+      if (!new_element)
+      {
          fprintf(stderr, "out of memory\n");
          exit(8);
       }
 
       /* allocate mem for the keyword */
-      new_element->keyword = (char*) malloc(strlen(keyword)+1);
+      new_element->keyword = (char *) malloc(strlen(keyword) + 1);
       if (new_element->keyword)
+      {
          strcpy(new_element->keyword, keyword);
-      else {
+      }
+      else
+      {
          fprintf(stderr, "out of memory\n");
          exit(8);
       }
@@ -162,28 +207,42 @@ configuration_add(configuration* list, const char* keyword, const char* value)
    }
 
    /* allocate mem for the value */
-   new_element->value = (char*) malloc(strlen(value)+1);
+   new_element->value = (char *) malloc(strlen(value) + 1);
    if (new_element->value)
+   {
       strcpy(new_element->value, value);
-   else {
+   }
+   else
+   {
       fprintf(stderr, "out of memory\n");
       exit(8);
    }
 }
 
-void
-configuration_free(configuration* list)
-{
-   configuration_element *lp, *lp_next;
 
-   for (lp_next = list->first; lp_next != NULL; ) {
+/*=****************************************************************************
+**
+** DESCRIPTION :
+**
+** RETURN VALUE:
+**                                                                           */
+/*=***************************************************************************/
+void configuration_free(configuration * list)
+{
+   configuration_element *lp,
+                 *lp_next;
+
+   for (lp_next = list->first; lp_next != NULL;)
+   {
       lp = lp_next;
       lp_next = lp_next->next;
-      if (lp->keyword) {
+      if (lp->keyword)
+      {
          free(lp->keyword);
          lp->keyword = NULL;
       }
-      if (lp->value) {
+      if (lp->value)
+      {
          free(lp->value);
          lp->value = NULL;
       }
@@ -193,30 +252,51 @@ configuration_free(configuration* list)
    list->n_elements = 0;
 }
 
-const configuration_element*
-configuration_find(configuration* list, const char* keyword)
+
+/*=****************************************************************************
+**
+** DESCRIPTION :
+**
+** RETURN VALUE:
+**                                                                           */
+/*=***************************************************************************/
+const configuration_element *configuration_find(configuration * list, const char *keyword)
 {
    configuration_element *lp = NULL;
 
    if (!keyword)
+   {
       return NULL;
+   }
 
    for (lp = list->first; lp != NULL; lp = lp->next)
+   {
       if (strcmp(lp->keyword, keyword) == 0)
-            break;
+      {
+         break;
+      }
+   }
 
    return lp;
 }
 
-static void
-do_regerror(int errcode, const regex_t *preg)
+
+/*=****************************************************************************
+**
+** DESCRIPTION :
+**
+** RETURN VALUE:
+**                                                                           */
+/*=***************************************************************************/
+static void do_regerror(int errcode, const regex_t * preg)
 {
-   char* errbuf;
-   size_t errbuf_size;
+   char          *errbuf;
+   size_t         errbuf_size;
 
    errbuf_size = regerror(errcode, preg, NULL, 0);
-   errbuf = (char*) malloc(errbuf_size);
-   if (!errbuf) {
+   errbuf = (char *) malloc(errbuf_size);
+   if (!errbuf)
+   {
       fprintf(stderr, "out of memory\n");
       exit(8);
    }
