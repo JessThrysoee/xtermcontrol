@@ -120,17 +120,18 @@ char *tmux_dcs_passthrough(char *ctlseq);
 void set_tty_raw();
 void set_tty_restore(void);
 
-void get_title(char *title, size_t size, int verbose, int ctl1);
-void get_osc(char *osc, size_t size, int verbose, int option, int ctl1, int ctl2);
+int get_title(char *title, size_t size, int verbose, int ctl1);
+int get_osc(char *osc, size_t size, int verbose, int option, int ctl1, int ctl2);
 
 void set_geometry(int ctl1, int ctl2, char *geometry);
-void get_geometry(char *geometry, size_t size, int verbose, int ctl1, int ctl2);
+int get_geometry(char *geometry, size_t size, int verbose, int ctl1, int ctl2);
 
 int configuration_write(const char *filepath);
 
 void usage(int status);
 void version(void);
 
+void report_error(const char *synopsis);
 void do_exit(int status);
 
 #endif

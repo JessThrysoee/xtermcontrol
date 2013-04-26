@@ -592,19 +592,29 @@ int main(int argc, char **argv)
             switch (i)
             {
              case GET_GEOMETRY:
-               get_geometry(temp, sizeof(temp), verbose, ctl1, ctl2);
+               if (get_geometry(temp, sizeof(temp), verbose, ctl1, ctl2) < 0)
+               {
+                  report_error(ctlseqstab[i].synopsis);
+               }
+               else if (*temp)
+               {
+                  fprintf(stdout, "%s\n", temp);
+               }
                break;
              case GET_TITLE:
-               get_title(temp, sizeof(temp), verbose, ctl1);
+               if (get_title(temp, sizeof(temp), verbose, ctl1) < 0)
+               {
+                  report_error(ctlseqstab[i].synopsis);
+               }
+               else if (*temp)
+               {
+                  fprintf(stdout, "%s\n", temp);
+               }
                break;
              default:
                /* NOTREACHED */
                assert(0);
                break;
-            }
-            if (*temp)
-            {
-               fprintf(stdout, "%s\n", temp);
             }
             break;
 
@@ -613,8 +623,11 @@ int main(int argc, char **argv)
             break;
 
           case GET_OSC:
-            get_osc(temp, sizeof(temp), verbose, i, ctl1, ctl2);
-            if (*temp)
+            if (get_osc(temp, sizeof(temp), verbose, i, ctl1, ctl2) < 0)
+            {
+               report_error(ctlseqstab[i].synopsis);
+            }
+            else if (*temp)
             {
                fprintf(stdout, "%s\n", temp);
             }
@@ -889,7 +902,7 @@ void raw_print(char *ctlseq)
 **
 ** DESCRIPTION : read raw terminal output, not '\0' terminated!
 **
-** RETURN VALUE:
+** RETURN VALUE: number of bytes read, or 0 on VTIME timeout
 **                                                                           */
 /*=***************************************************************************/
 int tty_read(char *output, size_t size)
@@ -912,17 +925,8 @@ int tty_read(char *output, size_t size)
       }
       else if (n == 0)
       {
-         if (res > 0)
-         {
-            /* nothing more to read */
-            break;
-         }
-         else
-         {
-            /* timeout without ever reading anything */
-            fprintf(stderr, "VTIME timeout\n");
-            do_exit(EXIT_FAILURE);
-         }
+         /* VTIME timeout. Nothing more to read, or nothing read */
+         break;
       }
       else if (n < 0)
       {
@@ -985,7 +989,7 @@ void csi_print3(int ctl1, int ctl2, int ctl3)
 ** RETURN VALUE:
 **                                                                           */
 /*=***************************************************************************/
-void get_title(char *title, size_t size, int verbose, int ctl1)
+int get_title(char *title, size_t size, int verbose, int ctl1)
 {
    /* OSC  l title ST */
    int            n;
@@ -994,6 +998,12 @@ void get_title(char *title, size_t size, int verbose, int ctl1)
    csi_print1(ctl1);
 
    n = tty_read(s, sizeof(s));
+
+   if (n == 0)
+   {
+      /* unsupported or disallowed */
+      return -1;
+   }
 
    /* get at least the OSC */
    if (n == 1)
@@ -1018,6 +1028,8 @@ void get_title(char *title, size_t size, int verbose, int ctl1)
    {
       snprintf(title, size, "%s=\"%s\"", ctlseqstab[GET_TITLE].conf_title, s + 3);
    }
+
+   return 0;
 }
 
 
@@ -1064,7 +1076,7 @@ void osc_print(int ps1, int ps2, char *pt)
 ** RETURN VALUE:
 **                                                                           */
 /*=***************************************************************************/
-void get_osc(char *osc, size_t size, int verbose, int option, int ctl1, int ctl2)
+int get_osc(char *osc, size_t size, int verbose, int option, int ctl1, int ctl2)
 {
    int            n;
    char          *p;
@@ -1082,6 +1094,13 @@ void get_osc(char *osc, size_t size, int verbose, int option, int ctl1, int ctl2
    }
 
    n = tty_read(s, sizeof(s));
+
+   if (n == 0)
+   {
+      /* unsupported or disallowed */
+      return -1;
+   }
+
    /* get at least the OSC */
    if (n == 1)
    {
@@ -1113,6 +1132,8 @@ void get_osc(char *osc, size_t size, int verbose, int option, int ctl1, int ctl2
    {
       snprintf(osc, size, "%s=\"%s\"", conf_title, p);
    }
+
+   return 0;
 }
 
 
@@ -1168,7 +1189,7 @@ void set_geometry(int ctl1, int ctl2, char *geometry)
 ** RETURN VALUE:
 **                                                                           */
 /*=***************************************************************************/
-void get_geometry(char *geometry, size_t size, int verbose, int ctl1, int ctl2)
+int get_geometry(char *geometry, size_t size, int verbose, int ctl1, int ctl2)
 {
    int            n,
                   w,
@@ -1180,6 +1201,12 @@ void get_geometry(char *geometry, size_t size, int verbose, int ctl1, int ctl2)
    /* get height, width - CSI 8 ; height ; width t */
    csi_print1(ctl1);
    n = tty_read(temp, sizeof(temp));
+
+   if (n == 0)
+   {
+      /* unsupported or disallowed */
+      return -1;
+   }
 
    /* get at least the CSI */
    if (n == 1)
@@ -1235,6 +1262,8 @@ void get_geometry(char *geometry, size_t size, int verbose, int ctl1, int ctl2)
    {
       snprintf(geometry, size, "%s=\"%dx%d%+d%+d\"", ctlseqstab[GET_GEOMETRY].conf_title, w, h, x, y);
    }
+
+   return 0;
 }
 
 
@@ -1381,6 +1410,18 @@ int configuration_write(const char *filepath)
    return 0;
 }
 
+
+/*=****************************************************************************
+**
+** DESCRIPTION :
+**
+** RETURN VALUE:
+**                                                                           */
+/*=***************************************************************************/
+void report_error(const char *synopsis) {
+   fprintf(stderr, "%s: %s is unsupported or disallowed by this terminal. "
+           "See also, TROUBLESHOOTING section of xtermcontrol(1) manpage.\n", program_name, synopsis);
+}
 
 /*=****************************************************************************
 **
