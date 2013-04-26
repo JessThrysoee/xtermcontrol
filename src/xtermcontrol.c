@@ -405,8 +405,7 @@ int main(int argc, char **argv)
          {0, 0, 0, 0}
       };
 
-      c = getopt_long(argc, argv, "+fvh",
-                      longopts, &longindex);
+      c = getopt_long(argc, argv, "+fvh", longopts, &longindex);
       if (c == -1)
       {
          break;
@@ -762,7 +761,7 @@ void set_tty_raw()
    tty_ts.c_iflag = 0;
    tty_ts.c_lflag = 0;
 
-   tty_ts.c_cc[VMIN] = 1;
+   tty_ts.c_cc[VMIN] = 0;
    tty_ts.c_cc[VTIME] = 1;
    tty_ts.c_lflag &= ~(ICANON | ECHO);
    tcsetattr(TTY_FILENO, TCSANOW, &tty_ts);
@@ -895,16 +894,44 @@ void raw_print(char *ctlseq)
 /*=***************************************************************************/
 int tty_read(char *output, size_t size)
 {
-   int            n;
+   int            res,
+                  n;
+   char          *p;
 
-   n = read(TTY_FILENO, output, size - 1);
-   if (n == -1)
+   res = 0;
+   p = output;
+
+   while (p < output + size)
    {
-      perror("read");
-      do_exit(EXIT_FAILURE);
+      n = read(TTY_FILENO, p, 1);
+
+      if (n > 0)
+      {
+         p += n;
+         res += n;
+      }
+      else if (n == 0)
+      {
+         if (res > 0)
+         {
+            /* nothing more to read */
+            break;
+         }
+         else
+         {
+            /* timeout without ever reading anything */
+            fprintf(stderr, "VTIME timeout\n");
+            do_exit(EXIT_FAILURE);
+         }
+      }
+      else if (n < 0)
+      {
+         perror("read");
+         do_exit(EXIT_FAILURE);
+      }
    }
 
-   return n;
+   return res;
 }
 
 
@@ -1003,6 +1030,7 @@ void get_title(char *title, size_t size, int verbose, int ctl1)
 /*=***************************************************************************/
 void osc_print(int ps1, int ps2, char *pt)
 {
+
    if (pt && *pt)
    {
       if (ps1 == 4)
@@ -1283,7 +1311,7 @@ void version(void)
 /*=***************************************************************************/
 int configuration_write(const char *filepath)
 {
-   FILE* fp;
+   FILE          *fp;
 
    fp = fopen(filepath, "w");
    if (fp == NULL)
