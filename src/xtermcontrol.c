@@ -1,7 +1,7 @@
 /****************************************************************************
 ** $Id: xtermcontrol.c,v 1.33 2002/10/26 17:20:36 jet Exp $
 **
-** Copyright (C) 2002-2007 Jess Thrysoee <jess@thrysoee.dk>
+** Copyright (C) 2002-2013 Jess Thrysoee <jess@thrysoee.dk>
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -319,7 +319,7 @@ int main(int argc, char **argv)
    int            verbose = 0;
    int            configuration_missing = 0;
    char          *text = NULL;
-   char           configuration_file[256];
+   char           configuration_file[BUFSIZ];
 
    configuration  list;         /* configuration linked list                 */
    const configuration_element *lp; /* configuration linked list element     */
@@ -524,7 +524,7 @@ int main(int argc, char **argv)
       check_term_variable();
    }
 
-   /* read configuration files */
+   /* read configuration file */
    configuration_init(&list);
 
    if (!configuration_file[0])
@@ -1323,7 +1323,7 @@ void version(void)
 {
    printf("%s %s\n", program_name, VERSION);
    printf("\n");
-   printf("Copyright (C) 2002-2007 Jess Thrysoee.\n");
+   printf("Copyright (C) 2002-2013 Jess Thrysoee.\n");
    printf("This is free software; see the source for copying conditions. There is NO\n");
    printf("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
 
