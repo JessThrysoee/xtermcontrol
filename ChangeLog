@@ -1,3 +1,16 @@
+2013-04-30  Jess Thrysoee
+
+   * Version 3.0
+
+   * all: Major version bump because the strategy of when a configuration
+	file is read has changed. Now xtermcontrol only reads the ~/.xtermcontrol file
+	if run without options, or if specifically requested by the --file option.
+	See also https://github.com/JessThrysoee/xtermcontrol/issues/1
+
+   * src/configuration.c: Prevent the terminal from becomming unresponsive
+	when attempting to report the current setting of a unsupported or
+	disallowed property.
+
 2013-04-26  Jess Thrysoee
 
    * Version 2.11
