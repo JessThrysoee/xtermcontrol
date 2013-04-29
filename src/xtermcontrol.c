@@ -315,6 +315,7 @@ int main(int argc, char **argv)
                   ctl1,
                   ctl2,
                   type;
+   int            has_options = 0;
    int            force = 0;
    int            verbose = 0;
    int            configuration_missing = 0;
@@ -410,6 +411,8 @@ int main(int argc, char **argv)
       {
          break;
       }
+
+      has_options = 1;
 
       switch (c)
       {
@@ -524,25 +527,31 @@ int main(int argc, char **argv)
       check_term_variable();
    }
 
-   /* read configuration file */
    configuration_init(&list);
 
-   if (!configuration_file[0])
+   /* only apply configurations if no options are specified or if a
+      configuration is specifically specified by the --file option           */
+   if (!has_options || configuration_file[0])
    {
-      /* default ~/.program_name configuration file */
-      snprintf(configuration_file, sizeof(configuration_file), "%s/.%s", getenv("HOME"), program_name);
-      if (configuration_read(&list, configuration_file) == -1)
+
+      /* read configuration file */
+      if (!configuration_file[0])
       {
-         configuration_missing = 1;
+         /* default ~/.program_name configuration file */
+         snprintf(configuration_file, sizeof(configuration_file), "%s/.%s", getenv("HOME"), program_name);
+         if (configuration_read(&list, configuration_file) == -1)
+         {
+            configuration_missing = 1;
+         }
       }
-   }
-   else
-   {
-      /* user specified configuration file */
-      if (configuration_read(&list, configuration_file) == -1)
+      else
       {
-         fprintf(stderr, "%s: %s: No such file or directory\n", program_name, configuration_file);
-         do_exit(EXIT_FAILURE);
+         /* user specified configuration file */
+         if (configuration_read(&list, configuration_file) == -1)
+         {
+            fprintf(stderr, "%s: %s: No such file or directory\n", program_name, configuration_file);
+            do_exit(EXIT_FAILURE);
+         }
       }
    }
 
@@ -1418,7 +1427,8 @@ int configuration_write(const char *filepath)
 ** RETURN VALUE:
 **                                                                           */
 /*=***************************************************************************/
-void report_error(const char *synopsis) {
+void report_error(const char *synopsis)
+{
    fprintf(stderr, "%s: %s is unsupported or disallowed by this terminal. "
            "See also, TROUBLESHOOTING section of xtermcontrol(1) manpage.\n", program_name, synopsis);
 }

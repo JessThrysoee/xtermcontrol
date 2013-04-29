@@ -91,8 +91,7 @@ Full reset.
 .IP "\fB\-\-raw\fR=\fICTLSEQS\fR"
 Issue raw control sequence (see also \fBXTERM CONTROL SEQUENCES\fR).
 .IP "\fB\-\-file\fR=\fIFILE\fR"
-Force \*x to read configurations (see also \fBCONFIGURATION\fR) from \fIFILE\fR
-instead of the standard personal initialization file ~/.\*x.
+Source a configuration \fIFILE\fR (see also \fBCONFIGURATION\fR).
 .IP "\fB\-\-force\fR, \fB\-f\fR"
 Skip TERM environment variable check.
 .IP "\fB\-\-verbose\fR, \fB\-v\fR"
@@ -105,9 +104,9 @@ Print the version number and exit.
 .\"   "CONFIGURATION"
 .\"
 .SH CONFIGURATION
-\*x reads a default, ~/.\*x, or a user specified
-configuration file on startup.
-Each line in the file is either a comment or contains an attribute.
+The default configuration file ~/.\*x is sourced if \*x is run without options or if specifically requested, e.g. '\*x \-\-file=~/.xtermcontrol'. 
+
+Each line in a configuration file is either a comment or contains an attribute.
 Attributes consist of a keyword and an associated value:
 .nf
 .sp
