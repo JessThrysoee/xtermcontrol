@@ -1,3 +1,11 @@
+2013-06-09  Jess Thrysoee
+
+   * Version 3.1
+
+   * getopt.c: remove build warning for unused parameter argc and argv
+
+   * autotools: use XTC_PACKAGE_YEAR macro to update copyright year
+
 2013-04-30  Jess Thrysoee
 
    * Version 3.0
@@ -8,7 +16,7 @@
 	See also https://github.com/JessThrysoee/xtermcontrol/issues/1
 
    * src/configuration.c: Prevent the terminal from becomming unresponsive
-	when attempting to report the current setting of a unsupported or
+	when attempting to report the current setting of an unsupported or
 	disallowed property.
 
 2013-04-26  Jess Thrysoee

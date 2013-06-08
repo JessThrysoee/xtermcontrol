@@ -8,13 +8,14 @@
 #    "./configure --disable-silent-rules" or "make V=1"
 #
 
-AC_INIT(xtermcontrol, 3.0, )
+AC_INIT(xtermcontrol, 3.1, )
 AC_CONFIG_SRCDIR([src/xtermcontrol.c])
 AC_CONFIG_HEADER([config.h])
 
 AM_INIT_AUTOMAKE
 
 XTC_PACKAGE_DATE
+XTC_PACKAGE_YEAR
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
