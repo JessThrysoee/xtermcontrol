@@ -171,6 +171,26 @@ The secret behind \*x is xterm control sequences. All the possible
 (there are a plethora of them) control sequences are documented in ctlseqs.txt,
 found in the \fBxterm(1)\fR distribution (see also \fBFILES\fR). 
 .\"
+.\"   "XTERM CONTROL SEQUENCES"
+.\"
+.SH OS X Terminal.app
+The OS X Terminal.app emulates an extended set of the VTxxx series commands, closely resembling dtterm.
+Therefore the following subset of \*x options works as expected:
+.nf
+.sp
+      --title
+      --geometry
+      --get-geometry
+      --maximize
+      --restore
+      --iconify
+      --de-iconify
+      --raise
+      --lower
+      --reset
+.sp
+.fi
+.\"
 .\"   "BUGS"
 .\"
 .SH TROUBLESHOOTING
