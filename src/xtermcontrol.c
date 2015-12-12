@@ -932,9 +932,14 @@ int tty_read(char *output, size_t size)
          p += n;
          res += n;
       }
-      else if (n == 0)
+      else if (n == 0 || (n == -1 && EAGAIN == errno))
       {
-         /* VTIME timeout. Nothing more to read, or nothing read */
+         /* VTIME timeout. Nothing more to read, or nothing read. */
+
+         /* tcsetattr(3). If no data is available, POSIX permits a read(2)
+          * in noncanonical mode to return either 0, or -1 with errno set
+          * to EAGAIN. */
+
          break;
       }
       else if (n < 0)
