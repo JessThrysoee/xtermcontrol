@@ -1,6 +1,8 @@
 #!/bin/sh
 
 rm -f \
+compile \
+depcomp \
 aclocal.m4 \
 config.h \
 config.h.in \

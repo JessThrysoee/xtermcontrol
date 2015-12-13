@@ -11,9 +11,6 @@ a.out.dSYM
 autom4te.cache
 src/.deps
 doc/xtermcontrol.1
-src/configuration.o
-src/getopt.o
-src/getopt1.o
+*.o
 src/xtermcontrol
-src/xtermcontrol.o
 tests/xtermcontrol.sh
