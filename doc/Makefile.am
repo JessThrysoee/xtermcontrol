@@ -13,7 +13,6 @@ all: $(PACKAGE).1
 $(PACKAGE).1: $(ROOTNAME).roff
 	@PACKAGE_CAPS=`echo $(PACKAGE) | tr [a-z] [A-Z]`;\
 	echo '.\" troff' > $@;\
-	echo ".ds x $(PACKAGE)" >> $@;\
 	echo ".TH $$PACKAGE_CAPS 1 \"$(PACKAGE_DATE)\" \"$(PACKAGE) $(VERSION)\" \"User Commands\"" >> $@;\
 	cat $(srcdir)/$(ROOTNAME).roff >> $@;\
 	echo "Copyright \(co 2002-$(PACKAGE_YEAR) Jess Thrysoee <jess@thrysoee.dk>" >> $@;

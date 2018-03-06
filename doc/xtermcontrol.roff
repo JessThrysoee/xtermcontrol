@@ -1,17 +1,16 @@
 .SH NAME
-.\" the x macro is the package name
-\*x \- dynamic control of XFree86 xterm properties.
+xtermcontrol \- dynamic control of XFree86 xterm properties.
 .\"
 .\"   "SYNOPSIS"
 .\"
 .SH SYNOPSIS
-.B \*x
+.B xtermcontrol
 .RI [OPTIONS] ...
 .\"
 .\"   "DESCRIPTION"
 .\"
 .SH DESCRIPTION
-.B \*x
+.B xtermcontrol
 makes it easy to change colors, title, font and geometry of a running XFree86 
 \fBxterm(1)\fR, as well as to report the current settings of the aforementioned
 properties.
@@ -19,7 +18,7 @@ properties.
 Window manipulations de\-/iconify, raise/lower, maximize/restore and reset
 are also supported.
 
-To complete the feature set; \*x lets advanced users issue any xterm control
+To complete the feature set; xtermcontrol lets advanced users issue any xterm control
 sequence of their choosing.
 .br
 .\"
@@ -50,7 +49,7 @@ PROMPT_COMMAND may overwrite the title.
 .IP "\fB\-\-geometry\fR=\fIWIDTHxHEIGHT+XOFF+YOFF\fR"
 Set size and/or position. Through its control sequences the xterm only
 recognize positive \fIXOFF\fR and \fIYOFF\fR offsets, which are pixels relative to the
-upper left hand corner of the display. \*x is therefore unable to
+upper left hand corner of the display. xtermcontrol is therefore unable to
 handle negative offsets as described in the \fBX(7x)\fR GEOMETRY SPECIFICATIONS
 and therefore truncates negative values to zero.
 .IP "\fB\-\-get\-fg\fR"
@@ -104,7 +103,7 @@ Print the version number and exit.
 .\"   "CONFIGURATION"
 .\"
 .SH CONFIGURATION
-The default configuration file ~/.\*x is sourced if \*x is run without options or if specifically requested, e.g. '\*x \-\-file=~/.xtermcontrol'. 
+The default configuration file ~/.xtermcontrol is sourced if xtermcontrol is run without options or if specifically requested, e.g. 'xtermcontrol \-\-file=~/.xtermcontrol'. 
 
 Each line in a configuration file is either a comment or contains an attribute.
 Attributes consist of a keyword and an associated value:
@@ -149,7 +148,7 @@ and all remaining characters on that line is ignored.
 .\"   "FONT NAMES"
 .\"
 .SH FONT NAMES
-\*x accepts any \fBX(7x)\fR FONT NAMES.
+xtermcontrol accepts any \fBX(7x)\fR FONT NAMES.
 Font names like \'\-adobe\-courier\-medium\-r\-normal\-\-10\-100\-75\-75\-m\-60\-iso8859\-1\' are
 very cumbersome to write, so it is convenient to make use of aliases, e.g.
 \'fixed\' or \'8x13\', if present in fonts.alias files of the font directories.
@@ -157,7 +156,7 @@ very cumbersome to write, so it is convenient to make use of aliases, e.g.
 .\"   "COLOR NAMES"
 .\"
 .SH COLOR NAMES
-\*x accepts any \fBX(7x)\fR COLOR NAMES.
+xtermcontrol accepts any \fBX(7x)\fR COLOR NAMES.
 Basically this means that colors are specified by name or rgb value, e.g. \'blue\',
 \'rgb:0000/0000/FFFF\' or \'#00F\'. Colors are typically reported by the
 xterm in a device-dependent numerical form, e.g. \'rgb:0000/0000/FFFF\'.
@@ -167,7 +166,7 @@ interpreted as the beginning of a comment by the shell (see also \fBFILES\fR).
 .\"   "XTERM CONTROL SEQUENCES"
 .\"
 .SH XTERM CONTROL SEQUENCES
-The secret behind \*x is xterm control sequences. All the possible
+The secret behind xtermcontrol is xterm control sequences. All the possible
 (there are a plethora of them) control sequences are documented in ctlseqs.txt,
 found in the \fBxterm(1)\fR distribution (see also \fBFILES\fR). 
 .\"
@@ -175,7 +174,7 @@ found in the \fBxterm(1)\fR distribution (see also \fBFILES\fR).
 .\"
 .SH OS X Terminal.app
 The OS X Terminal.app emulates an extended set of the VTxxx series commands, closely resembling dtterm.
-Therefore the following subset of \*x options works as expected:
+Therefore the following subset of xtermcontrol options works as expected:
 .nf
 .sp
       \-\-title
@@ -196,12 +195,12 @@ Therefore the following subset of \*x options works as expected:
 .SH TROUBLESHOOTING
 If read/write permissions on the tty's are changed so
 that special group membership is required to be able to write to the pseudo terminal,
-the easiest workaround is to install \*x setuid root.
+the easiest workaround is to install xtermcontrol setuid root.
 
 \fBXterm(1)\fR has three resources, allowWindowOps, allowTitleOps, and
-allowFontOps, that enables or disables special operations which \*x relies on.
-If any of these resources are set (or defaults) to 'false' \*x may hang.
-The resources corresponds to \*x options as:
+allowFontOps, that enables or disables special operations which xtermcontrol relies on.
+If any of these resources are set (or defaults) to 'false' xtermcontrol may hang.
+The resources corresponds to xtermcontrol options as:
 .nf
 .sp
    allowWindowOps:
