@@ -43,7 +43,7 @@ Set mouse pointer background color.
 .IP "\fB\-\-font\fR=\fIFONT\fR"
 Set font name (see also \fBFONT NAMES\fR). Alternatively it is possible to specify
 a fontmenu index as \'#[0-6]\' or navigate the fontmenu by
-relative sizes as \'#+N\' or \'#-N\', where N is an optional integer.
+relative sizes as \'#+N\' or \'#\-N\', where N is an optional integer.
 .IP "\fB\-\-title\fR=\fISTRING\fR"
 Set window title. Note that mechanisms like the \fBbash(1)\fR
 PROMPT_COMMAND may overwrite the title.
@@ -58,7 +58,7 @@ Report foreground color.
 .IP "\fB\-\-get\-bg\fR"
 Report background color.
 .IP "\fB\-\-get\-color\fIN\fR"
-Report N'th [0-15] color.
+Report N'th [0\-15] color.
 .IP "\fB\-\-get\-highlight\fR"
 Report highlight color.
 .IP "\fB\-\-get\-cursor\fR"
@@ -150,7 +150,7 @@ and all remaining characters on that line is ignored.
 .\"
 .SH FONT NAMES
 \*x accepts any \fBX(7x)\fR FONT NAMES.
-Font names like \'-adobe-courier-medium-r-normal--10-100-75-75-m-60-iso8859-1\' are
+Font names like \'\-adobe\-courier\-medium\-r\-normal\-\-10\-100\-75\-75\-m\-60\-iso8859\-1\' are
 very cumbersome to write, so it is convenient to make use of aliases, e.g.
 \'fixed\' or \'8x13\', if present in fonts.alias files of the font directories.
 .\"
@@ -178,16 +178,16 @@ The OS X Terminal.app emulates an extended set of the VTxxx series commands, clo
 Therefore the following subset of \*x options works as expected:
 .nf
 .sp
-      --title
-      --geometry
-      --get-geometry
-      --maximize
-      --restore
-      --iconify
-      --de-iconify
-      --raise
-      --lower
-      --reset
+      \-\-title
+      \-\-geometry
+      \-\-get\-geometry
+      \-\-maximize
+      \-\-restore
+      \-\-iconify
+      \-\-de\-iconify
+      \-\-raise
+      \-\-lower
+      \-\-reset
 .sp
 .fi
 .\"
@@ -205,25 +205,25 @@ The resources corresponds to \*x options as:
 .nf
 .sp
    allowWindowOps:
-      --raise
-      --lower
-      --restore
-      --maximize
-      --iconify
-      --de-iconify
-      --get-title
-      --geometry
-      --get-geometry
+      \-\-raise
+      \-\-lower
+      \-\-restore
+      \-\-maximize
+      \-\-iconify
+      \-\-de\-iconify
+      \-\-get\-title
+      \-\-geometry
+      \-\-get\-geometry
 
    allowTitleOps:
-      --title
+      \-\-title
 
    allowFontOps:
-      --font
-      --get-font
+      \-\-font
+      \-\-get\-font
 .sp
 .fi
-All three resources can usually be enabled for the current xterm session via a menu; ctrl+rightclick and look for menu item names like 'Allow Window Ops'. To set these resource values persistently you can add the following to either your local ~/.Xdefaults file, or to a system-wide resource file like /etc/X11/app-defaults/XTerm:
+All three resources can usually be enabled for the current xterm session via a menu; ctrl+rightclick and look for menu item names like 'Allow Window Ops'. To set these resource values persistently you can add the following to either your local ~/.Xdefaults file, or to a system-wide resource file like /etc/X11/app\-defaults/XTerm:
 .nf
 .sp
    *VT100.allowWindowOps: true
