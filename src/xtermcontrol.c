@@ -13,7 +13,6 @@
 #include <config.h>
 
 #include <assert.h>
-#include <config.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -1045,21 +1044,21 @@ void osc_print(int ps1, int ps2, char *pt)
         if (ps1 == 4)
         {
             /* colorN */
-            snprintf(temp, sizeof(temp), "\033]%d;%d;%s\007", ps1, ps2, pt);
+            snprintf(temp, sizeof(temp), "\033]%d;%d;%s\033\\", ps1, ps2, pt);
         }
         else
         {
-            snprintf(temp, sizeof(temp), "\033]%d;%s\007", ps1, pt);
+            snprintf(temp, sizeof(temp), "\033]%d;%s\033\\", ps1, pt);
         }
     }
     else if (ps1 == 4)
     {
         /* colorN */
-        snprintf(temp, sizeof(temp), "\033]%d;%d;?\007", ps1, ps2);
+        snprintf(temp, sizeof(temp), "\033]%d;%d;?\033\\", ps1, ps2);
     }
     else
     {
-        snprintf(temp, sizeof(temp), "\033]%d;?\007", ps1);
+        snprintf(temp, sizeof(temp), "\033]%d;?\033\\", ps1);
     }
 
     raw_print(temp);
@@ -1103,13 +1102,25 @@ int get_osc(char *osc, size_t size, int verbose, unsigned int option, int ctl1, 
         n += tty_read(s + 1, sizeof(s) - 1);
     }
 
-    while (s[n - 1] != '\007')
+    while ((s[n - 1] != '\007') && !(n - 2 >= 0 && s[n - 2] == '\033' && s[n - 1] == '\\'))
     {
         n += tty_read(s + n, sizeof(s) - n);
     }
 
-    /* n-2: discard BEL */
-    s[n - 1] = '\0';
+    if (s[n - 1] == '\007')
+    {
+        /* n-1: discard BEL */
+        s[n - 1] = '\0';
+    }
+    else if (n - 2 >= 0 && s[n - 2] == '\033' && s[n - 1] == '\\')
+    {
+        /* n-2: discard ST */
+        s[n - 2] = '\0';
+    }
+    else
+    {
+        return -1;
+    }
 
     /* discard OSC Ps ; */
     p = strchr(s, ';');
