@@ -26,22 +26,22 @@
 #include "xtermcontrol.h"
 
 /* The name the program was run with, stripped of any leading path. */
-char *program_name;
+static char *program_name;
 
 static char temp[BUFSIZ];
 
 /* controlling terminal fps and descriptor */
-FILE *ctty;
-FILE *tty_in;
-FILE *tty_out;
-int TTY_FILENO;
+static FILE *ctty;
+static FILE *tty_in;
+static FILE *tty_out;
+static int TTY_FILENO;
 
 /* termios settings */
-struct termios tty_ts,
-    tty_ts_orig;
-struct termios *tty_ts_orig_pt = NULL;
+static struct termios tty_ts;
+static struct termios tty_ts_orig;
+static struct termios *tty_ts_orig_pt = NULL;
 
-struct controlseqs ctlseqstab[] =
+static struct controlseqs ctlseqstab[] =
     {
         {10, 0, NULL, OSC, /* FG */
          "foreground",
@@ -904,9 +904,9 @@ void raw_print(char *ctlseq)
 ** RETURN VALUE: number of bytes read, or 0 on VTIME timeout
 **                                                                           */
 /*=***************************************************************************/
-int tty_read(char *output, size_t size)
+ssize_t tty_read(char *output, size_t size)
 {
-    int res,
+    ssize_t res,
         n;
     char *p;
 
@@ -990,7 +990,7 @@ void csi_print3(int ctl1, int ctl2, int ctl3)
 int get_title(char *title, size_t size, int verbose, int ctl1)
 {
     /* OSC  l title ST */
-    int n;
+    ssize_t n;
     static char s[BUFSIZ];
 
     csi_print1(ctl1);
@@ -1072,9 +1072,9 @@ void osc_print(int ps1, int ps2, char *pt)
 ** RETURN VALUE:
 **                                                                           */
 /*=***************************************************************************/
-int get_osc(char *osc, size_t size, int verbose, int option, int ctl1, int ctl2)
+int get_osc(char *osc, size_t size, int verbose, unsigned int option, int ctl1, int ctl2)
 {
-    int n;
+    ssize_t n;
     char *p;
     static char s[BUFSIZ];
 
@@ -1185,16 +1185,16 @@ void set_geometry(int ctl1, int ctl2, char *geometry)
 /*=***************************************************************************/
 int get_geometry(char *geometry, size_t size, int verbose, int ctl1, int ctl2)
 {
-    int n,
-        w,
+    ssize_t n;
+    int w,
         h,
         x,
         y;
-    char temp[20];
+    char local_temp[20];
 
     /* get height, width - CSI 8 ; height ; width t */
     csi_print1(ctl1);
-    n = tty_read(temp, sizeof(temp));
+    n = tty_read(local_temp, sizeof(local_temp));
 
     if (n == 0)
     {
@@ -1205,19 +1205,19 @@ int get_geometry(char *geometry, size_t size, int verbose, int ctl1, int ctl2)
     /* get at least the CSI */
     if (n == 1)
     {
-        n += tty_read(temp + 1, sizeof(temp) - 1);
+        n += tty_read(local_temp + 1, sizeof(local_temp) - 1);
     }
 
-    while (temp[n - 1] != 't')
+    while (local_temp[n - 1] != 't')
     {
-        n += tty_read(temp + n, sizeof(temp) - n);
+        n += tty_read(local_temp + n, sizeof(local_temp) - n);
     }
 
     /* n-1: discard t */
-    temp[n - 1] = '\0';
+    local_temp[n - 1] = '\0';
 
-    /* temp+4: discard CSI 8 ; */
-    if (sscanf(temp + 4, "%d;%d", &h, &w) != 2)
+    /* local_temp+4: discard CSI 8 ; */
+    if (sscanf(local_temp + 4, "%d;%d", &h, &w) != 2)
     {
         fprintf(stderr, "%s: failed to read xterm size\n", program_name);
         do_exit(EXIT_FAILURE);
@@ -1225,24 +1225,24 @@ int get_geometry(char *geometry, size_t size, int verbose, int ctl1, int ctl2)
 
     /* get x,y  - CSI 3 ; x; yt */
     csi_print1(ctl2);
-    n = tty_read(temp, sizeof(temp));
+    n = tty_read(local_temp, sizeof(local_temp));
 
     /* get at least the CSI */
     if (n == 1)
     {
-        n += tty_read(temp + 1, sizeof(temp) - 1);
+        n += tty_read(local_temp + 1, sizeof(local_temp) - 1);
     }
 
-    while (temp[n - 1] != 't')
+    while (local_temp[n - 1] != 't')
     {
-        n += tty_read(temp + n, sizeof(temp) - n);
+        n += tty_read(local_temp + n, sizeof(local_temp) - n);
     }
 
     /* n-1: discard t */
-    temp[n - 1] = '\0';
+    local_temp[n - 1] = '\0';
 
-    /* temp+4: discard CSI 3 ; */
-    if (sscanf(temp + 4, "%d;%dt", &x, &y) != 2)
+    /* local_temp+4: discard CSI 3 ; */
+    if (sscanf(local_temp + 4, "%d;%dt", &x, &y) != 2)
     {
         fprintf(stderr, "%s: failed to read xterm position\n", program_name);
         do_exit(EXIT_FAILURE);

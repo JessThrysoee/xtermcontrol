@@ -111,17 +111,17 @@ void csi_print3(int ctl1, int ctl2, int ctl3);
 
 void osc_print(int ps1, int ps2, char *pt);
 
-void tty_control();
+void tty_control(void);
 char *ctty_path(void);
 void raw_print(char *ctlseq);
-int tty_read(char *output, size_t size);
+ssize_t tty_read(char *output, size_t size);
 
 char *tmux_dcs_passthrough(char *ctlseq);
-void set_tty_raw();
+void set_tty_raw(void);
 void set_tty_restore(void);
 
 int get_title(char *title, size_t size, int verbose, int ctl1);
-int get_osc(char *osc, size_t size, int verbose, int option, int ctl1, int ctl2);
+int get_osc(char *osc, size_t size, int verbose, unsigned int option, int ctl1, int ctl2);
 
 void set_geometry(int ctl1, int ctl2, char *geometry);
 int get_geometry(char *geometry, size_t size, int verbose, int ctl1, int ctl2);

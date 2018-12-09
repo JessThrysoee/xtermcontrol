@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 #
 # Compile pedantic and with debug symbols:
-#    CFLAGS="-ggdb -Wall -Wextra -pedantic -ansi -O0" ./configure
+#    CFLAGS="-ggdb -Wall -Wextra -pedantic -std=c89 -O0" ./configure
 #
 # Verbose output can be enabled with
 #    "./configure --disable-silent-rules" or "make V=1"
