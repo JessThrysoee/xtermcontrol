@@ -47,26 +47,24 @@
 
 typedef struct configuration_element
 {
-   struct configuration_element *next;
-   char          *keyword;
-   char          *value;
+    struct configuration_element *next;
+    char *keyword;
+    char *value;
 
 } configuration_element;
 
-
 typedef struct configuration
 {
-   struct configuration_element *first;
-   int            n_elements;
+    struct configuration_element *first;
+    int n_elements;
 
 } configuration;
 
-
 /* configuration.c */
-void configuration_init(configuration * list);
-int configuration_read(configuration * list, const char *filepath);
-void configuration_free(configuration * list);
-const configuration_element *configuration_find(configuration * list, const char *keyword);
+void configuration_init(configuration *list);
+int configuration_read(configuration *list, const char *filepath);
+void configuration_free(configuration *list);
+const configuration_element *configuration_find(configuration *list, const char *keyword);
 
 /*
   Something like the following function should be created to write the

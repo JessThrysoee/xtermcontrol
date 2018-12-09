@@ -17,91 +17,91 @@
 
 enum CTLSEQS_TYPE
 {
-   CSI,
-   GET_CSI,
-   OSC,
-   GET_OSC,
-   ANY
+    CSI,
+    GET_CSI,
+    OSC,
+    GET_OSC,
+    ANY
 };
 
 enum OPTIONS
 {
-   FG,
-   BG,
-   COLOR_0,
-   COLOR_1,
-   COLOR_2,
-   COLOR_3,
-   COLOR_4,
-   COLOR_5,
-   COLOR_6,
-   COLOR_7,
-   COLOR_8,
-   COLOR_9,
-   COLOR_10,
-   COLOR_11,
-   COLOR_12,
-   COLOR_13,
-   COLOR_14,
-   COLOR_15,
-   COLOR_HL,
-   CURSOR,
-   MOUSE_FG,
-   MOUSE_BG,
-   FONT,
-   TITLE,
-   GEOMETRY,
-   GET_FG,
-   GET_BG,
-   GET_COLOR_0,
-   GET_COLOR_1,
-   GET_COLOR_2,
-   GET_COLOR_3,
-   GET_COLOR_4,
-   GET_COLOR_5,
-   GET_COLOR_6,
-   GET_COLOR_7,
-   GET_COLOR_8,
-   GET_COLOR_9,
-   GET_COLOR_10,
-   GET_COLOR_11,
-   GET_COLOR_12,
-   GET_COLOR_13,
-   GET_COLOR_14,
-   GET_COLOR_15,
-   GET_COLOR_HL,
-   GET_CURSOR,
-   GET_MOUSE_FG,
-   GET_MOUSE_BG,
-   GET_FONT,
-   GET_TITLE,
-   GET_GEOMETRY,
-   MAXIMIZE,
-   RESTORE,
-   ICONIFY,
-   DE_ICONIFY,
-   RAISE,
-   LOWER,
-   RESET,
-   RAW,
-   FILE_CONF
+    FG,
+    BG,
+    COLOR_0,
+    COLOR_1,
+    COLOR_2,
+    COLOR_3,
+    COLOR_4,
+    COLOR_5,
+    COLOR_6,
+    COLOR_7,
+    COLOR_8,
+    COLOR_9,
+    COLOR_10,
+    COLOR_11,
+    COLOR_12,
+    COLOR_13,
+    COLOR_14,
+    COLOR_15,
+    COLOR_HL,
+    CURSOR,
+    MOUSE_FG,
+    MOUSE_BG,
+    FONT,
+    TITLE,
+    GEOMETRY,
+    GET_FG,
+    GET_BG,
+    GET_COLOR_0,
+    GET_COLOR_1,
+    GET_COLOR_2,
+    GET_COLOR_3,
+    GET_COLOR_4,
+    GET_COLOR_5,
+    GET_COLOR_6,
+    GET_COLOR_7,
+    GET_COLOR_8,
+    GET_COLOR_9,
+    GET_COLOR_10,
+    GET_COLOR_11,
+    GET_COLOR_12,
+    GET_COLOR_13,
+    GET_COLOR_14,
+    GET_COLOR_15,
+    GET_COLOR_HL,
+    GET_CURSOR,
+    GET_MOUSE_FG,
+    GET_MOUSE_BG,
+    GET_FONT,
+    GET_TITLE,
+    GET_GEOMETRY,
+    MAXIMIZE,
+    RESTORE,
+    ICONIFY,
+    DE_ICONIFY,
+    RAISE,
+    LOWER,
+    RESET,
+    RAW,
+    FILE_CONF
 };
 
 /* xterm control sequences are described in ctlseq.ms, which is
    distributed with the xterm source package, obtainable from
    http://dickey.his.com/xterm.
    To read the troff file as plain text, issue
-   "nroff -ms -t -c ctlseqs.ms | col -b > ctlseqs.txt"                       */
+   "nroff -ms -t -c ctlseqs.ms | col -b > ctlseqs.txt"              */
 
 struct controlseqs
 {
-   int            ctl1;         /* Ps                                        */
-   int            ctl2;         /* Ps                                        */
-   char          *text;         /* Pt                                        */
-   int            type;         /* CTLSEQS_TYPE                              */
-   char          *conf_title;   /* used in reports and configuration file    */
-   char          *synopsis;     /* used in usage                             */
-   char          *description;  /* used in usage and configuration file      */
+    int ctl1;          /* Ps                                        */
+    int ctl2;          /* Ps                                        */
+    char *text;        /* Pt                                        */
+    int type;          /* CTLSEQS_TYPE                              */
+    char *conf_title;  /* used in reports and configuration file    */
+    char *synopsis;    /* used in usage                             */
+    char *description; /* used in usage and configuration file      */
 };
 
 void check_term_variable(void);
