@@ -5,9 +5,11 @@
    * doc/xtermcontrol.c: Add --get-color[0-255] and --color[0-255]
 	See also https://github.com/JessThrysoee/xtermcontrol/issues/7
 
+2018-12-09  Jess Thrysoee
+
    * Version 3.5
 
-   * doc/xtermcontrol.c:  OSC string terminator: Always send ST, but accept either ST or BEL. 
+   * doc/xtermcontrol.c: OSC string terminator: Always send ST, but accept either ST or BEL. 
 	See also https://github.com/JessThrysoee/xtermcontrol/issues/8
 
    * all: format with clang-format and fix compiler warnings
