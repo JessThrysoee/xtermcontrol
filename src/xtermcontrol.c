@@ -1904,7 +1904,7 @@ int get_geometry(char *geometry, size_t size, int verbose, int ctl1, int ctl2)
         h,
         x,
         y;
-    char local_temp[20];
+    char local_temp[BUFSIZ];
 
     /* get height, width - CSI 8 ; height ; width t */
     csi_print1(ctl1);
