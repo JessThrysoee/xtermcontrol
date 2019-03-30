@@ -2011,7 +2011,7 @@ void usage(int status)
         printf("  %-35s %s\n", "--help, -h", "print this help and exit");
         printf("  %-35s %s\n", "--version", "print the version number and exit");
         printf("\n");
-        printf("Report bugs to <jess@thrysoee.dk>\n");
+        printf("See xtermcontrol(1) manpage for more information.\n");
     }
 
     do_exit(status);
