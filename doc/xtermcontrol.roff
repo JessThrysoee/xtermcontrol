@@ -172,7 +172,7 @@ found in the \fBxterm(1)\fR distribution (see also \fBFILES\fR).
 .\"
 .\"   "XTERM CONTROL SEQUENCES"
 .\"
-.SH macOS Terminal.app
+.SH MACOS TERMINAL.APP
 The macOS Terminal.app emulates an extended set of the VTxxx series commands, closely resembling dtterm.
 Therefore the following subset of xtermcontrol options works as expected:
 .nf
@@ -187,6 +187,22 @@ Therefore the following subset of xtermcontrol options works as expected:
       \-\-raise
       \-\-lower
       \-\-reset
+.sp
+.fi
+Color names are ignored, but device-dependent numerical form and rgb values works as expected for
+the following subset of xtermcontrol options (see also \fBCOLOR NAMES\fR):
+.nf
+.sp
+      \-\-fg
+      \-\-get\-fg
+      \-\-bg
+      \-\-get\-bg
+      \-\-cursor
+      \-\-get\-cursor
+      \-\-mouse-fg
+      \-\-get\-mouse-fg
+      \-\-mouse-bg
+      \-\-get\-mouse-bg
 .sp
 .fi
 .\"
