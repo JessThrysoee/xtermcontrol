@@ -7,7 +7,9 @@ fi
 
 Main() {
    ForeAndBackgroundColorTest
+   ForeAndBackgroundRgbColorTest
    CursorAndMouseColorTest
+   CursorAndMouseRgbColorTest
    ColorTest
    FontTest
    TitleTest
@@ -104,6 +106,29 @@ ForeAndBackgroundColorTest() {
    $XTC --fg=$FOREGROUND --bg=$BACKGROUND
 }
 
+ForeAndBackgroundRgbColorTest() {
+   printf "\n%s\n" "Foreground and Background RGB Color Test:"
+
+   for i in 0 1 2 3 4 5 6 7
+   do
+      if expr 7 - $i > /dev/null
+      then
+         j=`expr 7 - $i`
+      else
+         j=0
+      fi
+      eval FG=\$COLOR_RGB_$j
+      eval BG=\$COLOR_RGB_$i
+
+      printf "  %s %-14s %s\n" `basename $XTC` "--fg=\"$FG\"" "--bg=\"$BG\""
+      $XTC --fg="$FG" --bg="$BG"
+      sleep 1
+   done
+
+   ## reset to user prefs.
+   $XTC --fg=$FOREGROUND --bg=$BACKGROUND
+}
+
 CursorAndMouseColorTest() {
    printf "\n%s\n" "Cursor and Mouse Pointer Color Test:"
 
@@ -117,6 +142,32 @@ CursorAndMouseColorTest() {
       fi
       eval FG=\$COLOR_$j
       eval BG=\$COLOR_$i
+
+      printf "  %s %-20s %-20s %s\n" `basename $XTC` \
+             "--mouse-fg=\"$FG\"" "--mouse-bg=\"$BG\"" "--cursor=\"$FG\""
+      $XTC --mouse-fg="$FG" --mouse-bg="$BG" --cursor="$FG" 
+      sleep 1
+   done
+
+   ## reset to user prefs.
+   $XTC --mouse-fg=$MOUSE_FOREGROUND\
+        --mouse-bg=$MOUSE_BACKGROUND\
+        --cursor=$CURSOR 
+}
+
+CursorAndMouseRgbColorTest() {
+   printf "\n%s\n" "Cursor and Mouse Pointer RGB Color Test:"
+
+   for i in 0 1 2 3 4 5 6 7
+   do
+      if expr 7 - $i > /dev/null
+      then
+         j=`expr 7 - $i`
+      else
+         j=0
+      fi
+      eval FG=\$COLOR_RGB_$j
+      eval BG=\$COLOR_RGB_$i
 
       printf "  %s %-20s %-20s %s\n" `basename $XTC` \
              "--mouse-fg=\"$FG\"" "--mouse-bg=\"$BG\"" "--cursor=\"$FG\""
@@ -303,6 +354,15 @@ COLOR_4="blue"
 COLOR_5="magenta"
 COLOR_6="cyan"
 COLOR_7="white"
+
+COLOR_RGB_0="rgb:0/0/0"
+COLOR_RGB_1="rgb:c2/36/21"
+COLOR_RGB_2="rgb:25/bc/24"
+COLOR_RGB_3="rgb:ad/ad/27"
+COLOR_RGB_4="rgb:49/2e/e1"
+COLOR_RGB_5="rgb:d3/38/d3"
+COLOR_RGB_6="rgb:33/bb/c8"
+COLOR_RGB_7="rgb:cb/cc/cd"
 
 trap 'SettingsRestore; exit' 0 1 2 5 15
 SettingsSave
