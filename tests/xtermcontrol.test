@@ -222,6 +222,7 @@ ColorTest() {
          fi
          $XTC --color$j="$COLOR"
       done
+      printf "\r"
       sleep 1
    done
 }
