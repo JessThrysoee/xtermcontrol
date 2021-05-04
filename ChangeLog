@@ -1,3 +1,11 @@
+2021-05-04  Jess Thrysoee
+
+   * Version 3.8
+
+   * tests/xtermcontrol.test: Add ForeAndBackground and CursorAndMouse RGB tests.
+
+   * doc/xtermcontrol.roff: macOS documentation changes
+
 2019-03-27  Jess Thrysoee
 
    * Version 3.7
