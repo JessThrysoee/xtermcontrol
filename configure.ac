@@ -10,7 +10,7 @@
 
 AC_INIT([xtermcontrol],[3.7],[])
 AC_CONFIG_SRCDIR([src/xtermcontrol.c])
-AC_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADERS([config.h])
 
 AM_INIT_AUTOMAKE
 
@@ -26,7 +26,9 @@ AC_PROG_CC
 AC_USE_SYSTEM_EXTENSIONS
 
 # Checks for header files.
-AC_HEADER_STDC
+AC_CHECK_INCLUDES_DEFAULT
+AC_PROG_EGREP
+
 AC_CHECK_HEADERS([fcntl.h libintl.h stdlib.h string.h strings.h termios.h unistd.h wchar.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
