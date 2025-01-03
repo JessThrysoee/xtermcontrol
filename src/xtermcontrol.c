@@ -1941,6 +1941,12 @@ int get_geometry(char *geometry, size_t size, int verbose, int ctl1, int ctl2)
     csi_print1(ctl2);
     n = tty_read(local_temp, sizeof(local_temp));
 
+    if (n == 0)
+    {
+        /* unsupported or disallowed */
+        return -1;
+    }
+
     /* get at least the CSI */
     if (n == 1)
     {
