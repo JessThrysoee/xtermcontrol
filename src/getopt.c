@@ -212,13 +212,10 @@ static char *posixly_correct;
    whose names are inconsistent.  */
 
 #ifndef getenv
-extern char *getenv();
+extern char *getenv(const char *name);
 #endif
 
-static char *
-    my_index(str, chr)
-        const char *str;
-int chr;
+static char * my_index(const char *str, int chr)
 {
     while (*str)
     {
@@ -298,8 +295,7 @@ static int nonoption_flags_len;
 static void exchange(char **);
 #endif
 
-static void
-    exchange(argv) char **argv;
+static void exchange(char **argv)
 {
     int bottom = first_nonopt;
     int middle = last_nonopt;
@@ -382,10 +378,7 @@ static void
 #if defined __STDC__ && __STDC__
 static const char *_getopt_initialize(int, char *const *, const char *);
 #endif
-static const char *
-    _getopt_initialize(argc, argv, optstring) int argc;
-char *const *argv;
-const char *optstring;
+static const char * _getopt_initialize(int argc, char *const *argv, const char *optstring)
 {
     (void)argc;
     (void)argv;
@@ -504,13 +497,7 @@ const char *optstring;
    If LONG_ONLY is nonzero, '-' as well as '--' can introduce
    long-named options.  */
 
-int
-    _getopt_internal(argc, argv, optstring, longopts, longind, long_only) int argc;
-char *const *argv;
-const char *optstring;
-const struct option *longopts;
-int *longind;
-int long_only;
+int _getopt_internal(int argc, char *const *argv, const char *optstring, const struct option *longopts, int *longind, int long_only)
 {
     int print_errors = opterr;
     if (optstring[0] == ':')
@@ -1153,10 +1140,7 @@ int long_only;
     }
 }
 
-int
-    getopt(argc, argv, optstring) int argc;
-char *const *argv;
-const char *optstring;
+int getopt(int argc, char *const *argv, const char *optstring)
 {
     return _getopt_internal(argc, argv, optstring,
                             (const struct option *)0,
@@ -1171,9 +1155,7 @@ const char *optstring;
 /* Compile with -DTEST to make an executable for use in testing
    the above definition of `getopt'.  */
 
-int
-    main(argc, argv) int argc;
-char **argv;
+int main(int argc, char **argv)
 {
     int c;
     int digit_optind = 0;

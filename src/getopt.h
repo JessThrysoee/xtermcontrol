@@ -144,7 +144,9 @@ extern "C"
    errors, only prototype getopt for the GNU C library.  */
     extern int getopt(int ___argc, char *const *___argv, const char *__shortopts);
 #else  /* not __GNU_LIBRARY__ */
-    extern int getopt();
+#if !defined(_POSIX_C_SOURCE) && !defined(__DARWIN_C_LEVEL) && __DARWIN_C_LEVEL < _POSIX_C_SOURCE
+    extern int getopt(void);
+#endif
 #endif /* __GNU_LIBRARY__ */
 
 #ifndef __need_getopt
@@ -162,12 +164,12 @@ extern "C"
                                 int __long_only);
 #endif
 #else /* not __STDC__ */
-extern int getopt();
+extern int getopt(void);
 #ifndef __need_getopt
-extern int getopt_long();
-extern int getopt_long_only();
+extern int getopt_long(void);
+extern int getopt_long_only(void);
 
-extern int _getopt_internal();
+extern int _getopt_internal(void);
 #endif
 #endif /* __STDC__ */
 
