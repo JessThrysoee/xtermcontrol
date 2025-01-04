@@ -1,3 +1,11 @@
+2025-01-04  Jess Thrysoee
+
+   * Version 3.9
+
+   * src/xtermcontrol.c: get-geometry: report if position is unsupported or disallowed.
+
+   * src/getopt{.c,.h,1.c}: Fix DARWIN getopt compiler warnings and error
+
 2021-05-04  Jess Thrysoee
 
    * Version 3.8
