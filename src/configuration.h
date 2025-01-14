@@ -1,7 +1,5 @@
 /****************************************************************************
-** $Id: configuration.h,v 1.5 2002/08/01 21:54:17 jet Exp $
-**
-** Copyright (C) 2002-2013 Jess Thrysoee <jess@thrysoee.dk>
+** Copyright (C) 2002-2025 Jess Thrysoee <jess@thrysoee.dk>
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
