@@ -11,6 +11,8 @@
 #ifndef XTERMCONTROL_H
 #define XTERMCONTROL_H
 
+#include <sys/types.h>
+
 enum CTLSEQS_TYPE
 {
     CSI,
