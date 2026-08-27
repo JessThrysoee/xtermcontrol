@@ -121,6 +121,10 @@ int configuration_read(configuration *list, const char *filepath)
         if (pmatch[2].rm_so != -1)
         {
             matchlen = pmatch[2].rm_eo - pmatch[2].rm_so;
+            while (matchlen > 0 && (temp[pmatch[2].rm_so + matchlen - 1] == ' ' || temp[pmatch[2].rm_so + matchlen - 1] == '\t'))
+            {
+                matchlen--;
+            }
             value = (char *)malloc(matchlen + 1);
             if (!value)
             {
