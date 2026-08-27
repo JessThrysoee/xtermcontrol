@@ -2093,7 +2093,7 @@ void version(void)
 {
     printf("%s %s\n", program_name, VERSION);
     printf("\n");
-    printf("Copyright (C) 2002-2013 Jess Thrysoee.\n");
+    printf("Copyright (C) 2002-2026 Jess Thrysoee.\n");
     printf("This is free software; see the source for copying conditions. There is NO\n");
     printf("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
 
