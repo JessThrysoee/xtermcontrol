@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: configure
+        run: ./configure CFLAGS="-g -O2 -Wall -Wextra"
+
+      - run: make
+      - run: make check
+      - run: make distcheck
+
+      - name: show test logs
+        if: failure()
+        run: cat tests/test-suite.log tests/regression.log || true
