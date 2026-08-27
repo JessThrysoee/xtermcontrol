@@ -1690,7 +1690,8 @@ void csi_print3(int ctl1, int ctl2, int ctl3)
 int get_title(char *title, size_t size, int verbose, int ctl1)
 {
     /* OSC  l title ST */
-    ssize_t n;
+    ssize_t n,
+        r;
     static char s[BUFSIZ];
 
     csi_print1(ctl1);
@@ -1703,15 +1704,14 @@ int get_title(char *title, size_t size, int verbose, int ctl1)
         return -1;
     }
 
-    /* get at least the OSC */
-    if (n == 1)
-    {
-        n += tty_read(s + 1, sizeof(s) - 1);
-    }
-
     while (!(s[n - 2] == '\033' && s[n - 1] == '\\'))
     {
-        n += tty_read(s + n, sizeof(s) - n);
+        r = tty_read(s + n, sizeof(s) - n);
+        if (r == 0)
+        {
+            return -1;
+        }
+        n += r;
     }
 
     /* n-2: discard ST */
@@ -1774,7 +1774,8 @@ void osc_print(int ps1, int ps2, char *pt)
 /*=***************************************************************************/
 int get_osc(char *osc, size_t size, int verbose, unsigned int option, int ctl1, int ctl2)
 {
-    ssize_t n;
+    ssize_t n,
+        r;
     char *p;
     static char s[BUFSIZ];
 
@@ -1797,15 +1798,14 @@ int get_osc(char *osc, size_t size, int verbose, unsigned int option, int ctl1, 
         return -1;
     }
 
-    /* get at least the OSC */
-    if (n == 1)
-    {
-        n += tty_read(s + 1, sizeof(s) - 1);
-    }
-
     while ((s[n - 1] != '\007') && !(n - 2 >= 0 && s[n - 2] == '\033' && s[n - 1] == '\\'))
     {
-        n += tty_read(s + n, sizeof(s) - n);
+        r = tty_read(s + n, sizeof(s) - n);
+        if (r == 0)
+        {
+            return -1;
+        }
+        n += r;
     }
 
     if (s[n - 1] == '\007')
@@ -1897,7 +1897,8 @@ void set_geometry(int ctl1, int ctl2, char *geometry)
 /*=***************************************************************************/
 int get_geometry(char *geometry, size_t size, int verbose, int ctl1, int ctl2)
 {
-    ssize_t n;
+    ssize_t n,
+        r;
     int w,
         h,
         x,
@@ -1914,15 +1915,14 @@ int get_geometry(char *geometry, size_t size, int verbose, int ctl1, int ctl2)
         return -1;
     }
 
-    /* get at least the CSI */
-    if (n == 1)
-    {
-        n += tty_read(local_temp + 1, sizeof(local_temp) - 1);
-    }
-
     while (local_temp[n - 1] != 't')
     {
-        n += tty_read(local_temp + n, sizeof(local_temp) - n);
+        r = tty_read(local_temp + n, sizeof(local_temp) - n);
+        if (r == 0)
+        {
+            return -1;
+        }
+        n += r;
     }
 
     /* n-1: discard t */
@@ -1945,15 +1945,14 @@ int get_geometry(char *geometry, size_t size, int verbose, int ctl1, int ctl2)
         return -1;
     }
 
-    /* get at least the CSI */
-    if (n == 1)
-    {
-        n += tty_read(local_temp + 1, sizeof(local_temp) - 1);
-    }
-
     while (local_temp[n - 1] != 't')
     {
-        n += tty_read(local_temp + n, sizeof(local_temp) - n);
+        r = tty_read(local_temp + n, sizeof(local_temp) - n);
+        if (r == 0)
+        {
+            return -1;
+        }
+        n += r;
     }
 
     /* n-1: discard t */
