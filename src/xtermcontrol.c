@@ -39,6 +39,8 @@ static struct termios tty_ts;
 static struct termios tty_ts_orig;
 static struct termios *tty_ts_orig_pt = NULL;
 
+static int process_ctlseq(unsigned int i, char *text, int verbose);
+
 /*=****************************************************************************
 **
 ** DESCRIPTION :
@@ -50,15 +52,14 @@ int main(int argc, char **argv)
 {
     unsigned i;
     int c,
-        ctl1,
-        ctl2,
         type;
+    int cli_order[NSEQ];
+    unsigned n_cli = 0;
     int has_options = 0;
     int force = 0;
     int verbose = 0;
     int failed = 0;
     int configuration_missing = 0;
-    char *text = NULL;
     char configuration_file[BUFSIZ];
 
     configuration list;              /* configuration linked list                 */
@@ -650,6 +651,10 @@ int main(int argc, char **argv)
             if (a != FILE_CONF)
             {
                 has_options = 1;
+                if (ctlseqstab[a].text == NULL)
+                {
+                    cli_order[n_cli++] = a;
+                }
             }
             switch (a)
             {
@@ -1260,99 +1265,22 @@ int main(int argc, char **argv)
     for (i = 0; i < NSEQ; i++)
     {
         type = ctlseqstab[i].type;
-        text = ctlseqstab[i].text;
 
-        temp[0] = '\0';
-
-        /* check if configuration exists */
-        if (!text && (type == OSC || type == CSI))
+        if (!ctlseqstab[i].text && (type == OSC || type == CSI))
         {
             lp = configuration_find(&list, ctlseqstab[i].conf_title);
-            if (lp)
+            if (lp && process_ctlseq(i, lp->value, verbose) < 0)
             {
-                text = lp->value;
+                failed = 1;
             }
         }
+    }
 
-        if (text)
+    for (i = 0; i < n_cli; i++)
+    {
+        if (process_ctlseq(cli_order[i], ctlseqstab[cli_order[i]].text, verbose) < 0)
         {
-            ctl1 = ctlseqstab[i].ctl1;
-            ctl2 = ctlseqstab[i].ctl2;
-
-            switch (type)
-            {
-            case CSI:
-                switch (i)
-                {
-                case RESTORE:
-                case MAXIMIZE:
-                    csi_print2(ctl1, ctl2);
-                    break;
-                case GEOMETRY:
-                    set_geometry(ctl1, ctl2, text);
-                    break;
-                default:
-                    csi_print1(ctl1);
-                    break;
-                }
-                break;
-
-            case GET_CSI:
-                switch (i)
-                {
-                case GET_GEOMETRY:
-                    if (get_geometry(temp, sizeof(temp), verbose, ctl1, ctl2) < 0)
-                    {
-                        report_error(ctlseqstab[i].synopsis);
-                        failed = 1;
-                    }
-                    else if (*temp)
-                    {
-                        fprintf(stdout, "%s\n", temp);
-                    }
-                    break;
-                case GET_TITLE:
-                    if (get_title(temp, sizeof(temp), verbose, ctl1) < 0)
-                    {
-                        report_error(ctlseqstab[i].synopsis);
-                        failed = 1;
-                    }
-                    else if (*temp)
-                    {
-                        fprintf(stdout, "%s\n", temp);
-                    }
-                    break;
-                default:
-                    /* NOTREACHED */
-                    assert(0);
-                    break;
-                }
-                break;
-
-            case OSC:
-                osc_print(ctl1, ctl2, text);
-                break;
-
-            case GET_OSC:
-                if (get_osc(temp, sizeof(temp), verbose, i, ctl1, ctl2) < 0)
-                {
-                    report_error(ctlseqstab[i].synopsis);
-                    failed = 1;
-                }
-                else if (*temp)
-                {
-                    fprintf(stdout, "%s\n", temp);
-                }
-                break;
-
-            case ANY:
-                raw_print(text);
-                break;
-
-            default:
-                fprintf(stderr, "unknown type: %d\n", type);
-                exit(EXIT_FAILURE);
-            }
+            failed = 1;
         }
     }
     configuration_free(&list);
@@ -1371,6 +1299,95 @@ int main(int argc, char **argv)
     assert(0);
 
     return 0; /* shut up the compiler */
+}
+
+static int process_ctlseq(unsigned int i, char *text, int verbose)
+{
+    int type,
+        ctl1,
+        ctl2;
+
+    type = ctlseqstab[i].type;
+    ctl1 = ctlseqstab[i].ctl1;
+    ctl2 = ctlseqstab[i].ctl2;
+
+    temp[0] = '\0';
+
+    switch (type)
+    {
+    case CSI:
+        switch (i)
+        {
+        case RESTORE:
+        case MAXIMIZE:
+            csi_print2(ctl1, ctl2);
+            break;
+        case GEOMETRY:
+            set_geometry(ctl1, ctl2, text);
+            break;
+        default:
+            csi_print1(ctl1);
+            break;
+        }
+        break;
+
+    case GET_CSI:
+        switch (i)
+        {
+        case GET_GEOMETRY:
+            if (get_geometry(temp, sizeof(temp), verbose, ctl1, ctl2) < 0)
+            {
+                report_error(ctlseqstab[i].synopsis);
+                return -1;
+            }
+            if (*temp)
+            {
+                fprintf(stdout, "%s\n", temp);
+            }
+            break;
+        case GET_TITLE:
+            if (get_title(temp, sizeof(temp), verbose, ctl1) < 0)
+            {
+                report_error(ctlseqstab[i].synopsis);
+                return -1;
+            }
+            if (*temp)
+            {
+                fprintf(stdout, "%s\n", temp);
+            }
+            break;
+        default:
+            assert(0);
+            break;
+        }
+        break;
+
+    case OSC:
+        osc_print(ctl1, ctl2, text);
+        break;
+
+    case GET_OSC:
+        if (get_osc(temp, sizeof(temp), verbose, i, ctl1, ctl2) < 0)
+        {
+            report_error(ctlseqstab[i].synopsis);
+            return -1;
+        }
+        if (*temp)
+        {
+            fprintf(stdout, "%s\n", temp);
+        }
+        break;
+
+    case ANY:
+        raw_print(text);
+        break;
+
+    default:
+        fprintf(stderr, "unknown type: %d\n", type);
+        exit(EXIT_FAILURE);
+    }
+
+    return 0;
 }
 
 /*=****************************************************************************
