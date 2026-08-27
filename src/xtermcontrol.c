@@ -56,6 +56,7 @@ int main(int argc, char **argv)
     int has_options = 0;
     int force = 0;
     int verbose = 0;
+    int failed = 0;
     int configuration_missing = 0;
     char *text = NULL;
     char configuration_file[BUFSIZ];
@@ -1301,6 +1302,7 @@ int main(int argc, char **argv)
                     if (get_geometry(temp, sizeof(temp), verbose, ctl1, ctl2) < 0)
                     {
                         report_error(ctlseqstab[i].synopsis);
+                        failed = 1;
                     }
                     else if (*temp)
                     {
@@ -1311,6 +1313,7 @@ int main(int argc, char **argv)
                     if (get_title(temp, sizeof(temp), verbose, ctl1) < 0)
                     {
                         report_error(ctlseqstab[i].synopsis);
+                        failed = 1;
                     }
                     else if (*temp)
                     {
@@ -1332,6 +1335,7 @@ int main(int argc, char **argv)
                 if (get_osc(temp, sizeof(temp), verbose, i, ctl1, ctl2) < 0)
                 {
                     report_error(ctlseqstab[i].synopsis);
+                    failed = 1;
                 }
                 else if (*temp)
                 {
@@ -1359,7 +1363,7 @@ int main(int argc, char **argv)
         }
     }
 
-    do_exit(EXIT_SUCCESS);
+    do_exit(failed ? EXIT_FAILURE : EXIT_SUCCESS);
 
     /* NOTREACHED */
     assert(0);
