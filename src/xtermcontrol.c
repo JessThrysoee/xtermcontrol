@@ -60,6 +60,7 @@ int main(int argc, char **argv)
     int verbose = 0;
     int failed = 0;
     int configuration_missing = 0;
+    char *home;
     char configuration_file[BUFSIZ];
 
     configuration list;              /* configuration linked list                 */
@@ -1205,9 +1206,15 @@ int main(int argc, char **argv)
                 ctlseqstab[GEOMETRY].text = optarg;
                 break;
             case FILE_CONF:
-                if (*optarg == '~')
+                if (optarg[0] == '~' && (optarg[1] == '/' || optarg[1] == '\0'))
                 {
-                    snprintf(configuration_file, sizeof(configuration_file), "%s%s", getenv("HOME"), optarg + 1);
+                    home = getenv("HOME");
+                    if (!home)
+                    {
+                        fprintf(stderr, "%s: HOME environment variable not set\n", program_name);
+                        exit(EXIT_FAILURE);
+                    }
+                    snprintf(configuration_file, sizeof(configuration_file), "%s%s", home, optarg + 1);
                 }
                 else
                 {
@@ -1242,11 +1249,15 @@ int main(int argc, char **argv)
         /* read configuration file */
         if (!configuration_file[0])
         {
-            /* default ~/.program_name configuration file */
-            snprintf(configuration_file, sizeof(configuration_file), "%s/.%s", getenv("HOME"), program_name);
-            if (configuration_read(&list, configuration_file) == -1)
+            home = getenv("HOME");
+            if (home)
             {
-                configuration_missing = 1;
+                /* default ~/.program_name configuration file */
+                snprintf(configuration_file, sizeof(configuration_file), "%s/.%s", home, program_name);
+                if (configuration_read(&list, configuration_file) == -1)
+                {
+                    configuration_missing = 1;
+                }
             }
         }
         else
