@@ -630,8 +630,6 @@ int main(int argc, char **argv)
             break;
         }
 
-        has_options = 1;
-
         switch (c)
         {
         case 'u':
@@ -649,6 +647,10 @@ int main(int argc, char **argv)
             break;
 
         case 0:
+            if (a != FILE_CONF)
+            {
+                has_options = 1;
+            }
             switch (a)
             {
             case FG:
