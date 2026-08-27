@@ -1825,9 +1825,14 @@ int get_osc(char *osc, size_t size, int verbose, unsigned int option, int ctl1, 
 
     /* discard OSC Ps ; */
     p = strchr(s, ';');
-    if (ctl1 == 4)
+    if (p && ctl1 == 4)
     {
         p = strchr(p + 1, ';');
+    }
+
+    if (!p)
+    {
+        return -1;
     }
 
     ++p;
