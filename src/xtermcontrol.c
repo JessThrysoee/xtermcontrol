@@ -1401,13 +1401,18 @@ void check_term_variable(void)
 {
     char *term;
 
+    if (getenv("TMUX"))
+    {
+        return;
+    }
+
     if ((term = getenv("TERM")) == NULL)
     {
         fprintf(stderr, "%s: failed to read TERM environment variable\n", program_name);
         do_exit(EXIT_FAILURE);
     }
 
-    if (strstr(term, "xterm") == NULL)
+    if (strstr(term, "xterm") == NULL && strstr(term, "tmux") == NULL)
     {
         fprintf(stderr, "%s: TERM=%s: probably not xterm variant\n", program_name, term);
         do_exit(EXIT_FAILURE);
