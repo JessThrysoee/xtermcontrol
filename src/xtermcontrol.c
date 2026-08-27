@@ -1491,7 +1491,11 @@ void tty_control()
 void set_tty_raw()
 {
     /* get and backup tty_in termios */
-    tcgetattr(TTY_FILENO, &tty_ts);
+    if (tcgetattr(TTY_FILENO, &tty_ts) == -1)
+    {
+        perror("tcgetattr");
+        do_exit(EXIT_FAILURE);
+    }
     tty_ts_orig = tty_ts;
     tty_ts_orig_pt = &tty_ts_orig;
 
@@ -1502,7 +1506,11 @@ void set_tty_raw()
     tty_ts.c_cc[VMIN] = 0;
     tty_ts.c_cc[VTIME] = 1;
     tty_ts.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(TTY_FILENO, TCSANOW, &tty_ts);
+    if (tcsetattr(TTY_FILENO, TCSANOW, &tty_ts) == -1)
+    {
+        perror("tcsetattr");
+        do_exit(EXIT_FAILURE);
+    }
 }
 
 /*=****************************************************************************
