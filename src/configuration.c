@@ -125,6 +125,13 @@ int configuration_read(configuration *list, const char *filepath)
             {
                 matchlen--;
             }
+            if (matchlen == 0)
+            {
+                fprintf(stderr, "missing value: %s\n", temp);
+                free(keyword);
+                keyword = NULL;
+                continue;
+            }
             value = (char *)malloc(matchlen + 1);
             if (!value)
             {
