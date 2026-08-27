@@ -12,6 +12,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,6 +41,7 @@ static struct termios tty_ts_orig;
 static struct termios *tty_ts_orig_pt = NULL;
 
 static int process_ctlseq(unsigned int i, char *text, int verbose);
+static void on_signal(int sig);
 
 /*=****************************************************************************
 **
@@ -1471,6 +1473,11 @@ void tty_control()
         tty_out = stdout;
     }
 
+    signal(SIGHUP, on_signal);
+    signal(SIGINT, on_signal);
+    signal(SIGQUIT, on_signal);
+    signal(SIGTERM, on_signal);
+
     set_tty_raw();
 }
 
@@ -1512,6 +1519,13 @@ void set_tty_restore(void)
     {
         tcsetattr(TTY_FILENO, TCSAFLUSH, tty_ts_orig_pt);
     }
+}
+
+static void on_signal(int sig)
+{
+    set_tty_restore();
+    signal(sig, SIG_DFL);
+    raise(sig);
 }
 
 /*=****************************************************************************
