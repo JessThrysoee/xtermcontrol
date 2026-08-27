@@ -23,3 +23,5 @@ tests/ptytest
 tests/.deps
 tests/*.log
 tests/*.trs
+doc/changelog.txt
+xtermcontrol-*.tar.gz
