@@ -1905,6 +1905,11 @@ void set_geometry(int ctl1, int ctl2, char *geometry)
     {
         set_size = 1;
     }
+    else
+    {
+        fprintf(stderr, "%s: invalid geometry: %s\n", program_name, geometry);
+        do_exit(EXIT_FAILURE);
+    }
 
     if (set_size)
     {
