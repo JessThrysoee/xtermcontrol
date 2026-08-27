@@ -18,6 +18,7 @@
 #include "configuration.h"
 
 static void configuration_add(configuration *list, const char *keyword, const char *value);
+static configuration_element *find_element(configuration *list, const char *keyword);
 static void do_regerror(int errcode, const regex_t *preg);
 
 /*=****************************************************************************
@@ -29,7 +30,6 @@ static void do_regerror(int errcode, const regex_t *preg);
 /*=***************************************************************************/
 void configuration_init(configuration *list)
 {
-    list->n_elements = 0;
     list->first = NULL;
 }
 
@@ -81,7 +81,7 @@ int configuration_read(configuration *list, const char *filepath)
     if (!pmatch)
     {
         fprintf(stderr, "out of memory\n");
-        exit(8);
+        exit(EXIT_FAILURE);
     }
 
     while (fgets(temp, sizeof(temp), stream) != NULL)
@@ -107,7 +107,7 @@ int configuration_read(configuration *list, const char *filepath)
             if (!keyword)
             {
                 fprintf(stderr, "out of memory\n");
-                exit(8);
+                exit(EXIT_FAILURE);
             }
             strncpy(keyword, temp + pmatch[1].rm_so, matchlen);
             keyword[matchlen] = '\0';
@@ -136,7 +136,7 @@ int configuration_read(configuration *list, const char *filepath)
             if (!value)
             {
                 fprintf(stderr, "out of memory\n");
-                exit(8);
+                exit(EXIT_FAILURE);
             }
             strncpy(value, temp + pmatch[2].rm_so, matchlen);
             value[matchlen] = '\0';
@@ -175,7 +175,7 @@ static void configuration_add(configuration *list, const char *keyword, const ch
     configuration_element *new_element;
 
     /* check if keyword already exists */
-    new_element = (configuration_element *)configuration_find(list, keyword);
+    new_element = find_element(list, keyword);
     if (new_element)
     {
         if (new_element->value)
@@ -191,7 +191,7 @@ static void configuration_add(configuration *list, const char *keyword, const ch
         if (!new_element)
         {
             fprintf(stderr, "out of memory\n");
-            exit(8);
+            exit(EXIT_FAILURE);
         }
 
         /* allocate mem for the keyword */
@@ -203,13 +203,12 @@ static void configuration_add(configuration *list, const char *keyword, const ch
         else
         {
             fprintf(stderr, "out of memory\n");
-            exit(8);
+            exit(EXIT_FAILURE);
         }
 
         /* link */
         new_element->next = list->first;
         list->first = new_element;
-        list->n_elements++;
     }
 
     /* allocate mem for the value */
@@ -221,7 +220,7 @@ static void configuration_add(configuration *list, const char *keyword, const ch
     else
     {
         fprintf(stderr, "out of memory\n");
-        exit(8);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -254,7 +253,6 @@ void configuration_free(configuration *list)
         free(lp);
     }
     list->first = NULL;
-    list->n_elements = 0;
 }
 
 /*=****************************************************************************
@@ -265,6 +263,11 @@ void configuration_free(configuration *list)
 **                                                                           */
 /*=***************************************************************************/
 const configuration_element *configuration_find(configuration *list, const char *keyword)
+{
+    return find_element(list, keyword);
+}
+
+static configuration_element *find_element(configuration *list, const char *keyword)
 {
     configuration_element *lp = NULL;
 
@@ -301,7 +304,7 @@ static void do_regerror(int errcode, const regex_t *preg)
     if (!errbuf)
     {
         fprintf(stderr, "out of memory\n");
-        exit(8);
+        exit(EXIT_FAILURE);
     }
     regerror(errcode, preg, errbuf, errbuf_size);
     fprintf(stderr, "%s\n", errbuf);

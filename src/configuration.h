@@ -54,7 +54,6 @@ typedef struct configuration_element
 typedef struct configuration
 {
     struct configuration_element *first;
-    int n_elements;
 
 } configuration;
 
