@@ -19,3 +19,4 @@ doc/xtermcontrol.1
 src/xtermcontrol
 tests/xtermcontrol.sh
 
+tests/ptytest

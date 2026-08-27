@@ -1,0 +1,41 @@
+#!/bin/sh
+
+XTC=${XTC:-../src/xtermcontrol}
+PTYTEST=${PTYTEST:-./ptytest}
+export XTC
+
+fail=0
+
+check() {
+   desc=$1
+   expected=$2
+   shift 2
+   out=`"$PTYTEST" "$@"`
+   if test "x$out" = "x$expected"
+   then
+      echo "ok: $desc"
+   else
+      echo "FAIL: $desc: got '$out', want '$expected'"
+      fail=1
+   fi
+}
+
+esc=`printf '\033'`
+bel=`printf '\007'`
+st="$esc\\"
+
+check "truncated title reply"    "child exited, status=1" --get-title "${esc}]lhello"
+check "one-byte reply"           "child exited, status=1" --get-title "$esc"
+check "truncated geometry reply" "child exited, status=1" --get-geometry "${esc}[8;24;80"
+check "reply without semicolon"  "child exited, status=1" --get-bg "${esc}]garbage$bel"
+check "no reply exits nonzero"   "child exited, status=1" --get-bg ""
+check "bel-terminated title"     "child exited, status=0" --get-title "${esc}]lhello$bel"
+check "st-terminated title"      "child exited, status=0" --get-title "${esc}]lhello$st"
+check "get-bg"                   "child exited, status=0" --get-bg "${esc}]11;rgb:ff/ff/ff$bel"
+check "get-color"                "child exited, status=0" --get-color99 "${esc}]4;99;rgb:aa/bb/cc$bel"
+check "invalid geometry"         "child exited, status=1" --geometry=nonsense ""
+check "set bg"                   "child exited, status=0" --bg=white ""
+check "set color"                "child exited, status=0" --color88=red ""
+check "reset"                    "child exited, status=0" --reset ""
+
+exit $fail
