@@ -26,8 +26,6 @@
 /* The name the program was run with, stripped of any leading path. */
 static char *program_name;
 
-static char temp[BUFSIZ];
-
 /* controlling terminal fps and descriptor */
 static FILE *ctty;
 static FILE *tty_in;
@@ -243,6 +241,7 @@ static int process_ctlseq(unsigned int i, char *text, int verbose)
     int type,
         ctl1,
         ctl2;
+    char temp[BUFSIZ];
 
     type = ctlseqstab[i].type;
     ctl1 = ctlseqstab[i].ctl1;
@@ -631,8 +630,10 @@ ssize_t tty_read(char *output, size_t size)
 /*=***************************************************************************/
 void csi_print1(int ctl1)
 {
-    snprintf(temp, sizeof(temp), "\033[%dt", ctl1);
-    raw_print(temp);
+    char buf[BUFSIZ];
+
+    snprintf(buf, sizeof(buf), "\033[%dt", ctl1);
+    raw_print(buf);
 }
 
 /*=****************************************************************************
@@ -644,8 +645,10 @@ void csi_print1(int ctl1)
 /*=***************************************************************************/
 void csi_print2(int ctl1, int ctl2)
 {
-    snprintf(temp, sizeof(temp), "\033[%d;%dt", ctl1, ctl2);
-    raw_print(temp);
+    char buf[BUFSIZ];
+
+    snprintf(buf, sizeof(buf), "\033[%d;%dt", ctl1, ctl2);
+    raw_print(buf);
 }
 
 /*=****************************************************************************
@@ -657,8 +660,10 @@ void csi_print2(int ctl1, int ctl2)
 /*=***************************************************************************/
 void csi_print3(int ctl1, int ctl2, int ctl3)
 {
-    snprintf(temp, sizeof(temp), "\033[%d;%d;%dt", ctl1, ctl2, ctl3);
-    raw_print(temp);
+    char buf[BUFSIZ];
+
+    snprintf(buf, sizeof(buf), "\033[%d;%d;%dt", ctl1, ctl2, ctl3);
+    raw_print(buf);
 }
 
 /*=****************************************************************************
@@ -726,30 +731,31 @@ int get_title(char *title, size_t size, int verbose, int ctl1)
 /*=***************************************************************************/
 void osc_print(int ps1, int ps2, char *pt)
 {
+    char buf[BUFSIZ];
 
     if (pt && *pt)
     {
         if (ps1 == 4)
         {
             /* colorN */
-            snprintf(temp, sizeof(temp), "\033]%d;%d;%s\033\\", ps1, ps2, pt);
+            snprintf(buf, sizeof(buf), "\033]%d;%d;%s\033\\", ps1, ps2, pt);
         }
         else
         {
-            snprintf(temp, sizeof(temp), "\033]%d;%s\033\\", ps1, pt);
+            snprintf(buf, sizeof(buf), "\033]%d;%s\033\\", ps1, pt);
         }
     }
     else if (ps1 == 4)
     {
         /* colorN */
-        snprintf(temp, sizeof(temp), "\033]%d;%d;?\033\\", ps1, ps2);
+        snprintf(buf, sizeof(buf), "\033]%d;%d;?\033\\", ps1, ps2);
     }
     else
     {
-        snprintf(temp, sizeof(temp), "\033]%d;?\033\\", ps1);
+        snprintf(buf, sizeof(buf), "\033]%d;?\033\\", ps1);
     }
 
-    raw_print(temp);
+    raw_print(buf);
 }
 
 /*=****************************************************************************
