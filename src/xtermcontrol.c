@@ -1500,29 +1500,6 @@ void set_tty_restore(void)
 
 /*=****************************************************************************
 **
-** DESCRIPTION : In tmux, use DCS with a "tmux;" prefix to pass escape
-** sequences through to the underlying terminal.
-**
-** Escape characters in the sequences must be doubled.
-**
-** RETURN VALUE:
-**                                                                           */
-/*=***************************************************************************/
-char *tmux_dcs_passthrough(char *ctlseq)
-{
-    static char s[BUFSIZ];
-
-    if (getenv("TMUX"))
-    {
-        snprintf(s, sizeof(s), "\033Ptmux;\033%s\033\\", ctlseq);
-        return s;
-    }
-
-    return ctlseq;
-}
-
-/*=****************************************************************************
-**
 ** DESCRIPTION : issue raw escape sequence.
 **
 ** RETURN VALUE:
@@ -1531,10 +1508,13 @@ char *tmux_dcs_passthrough(char *ctlseq)
 void raw_print(char *ctlseq)
 {
     int c;
+    size_t n,
+        i;
+    static char buf[BUFSIZ];
 
-    ctlseq = tmux_dcs_passthrough(ctlseq);
+    n = 0;
 
-    while ((c = *ctlseq++))
+    while ((c = *ctlseq++) && n < sizeof(buf) - 1)
     {
         if (c == '\\' && *ctlseq)
         {
@@ -1587,11 +1567,29 @@ void raw_print(char *ctlseq)
             case '\\':
                 break;
             default:
-                fputc('\\', tty_out);
+                buf[n++] = '\\';
                 break;
             }
         }
-        fputc(c, tty_out);
+        buf[n++] = c;
+    }
+
+    if (getenv("TMUX"))
+    {
+        fputs("\033Ptmux;", tty_out);
+        for (i = 0; i < n; i++)
+        {
+            if (buf[i] == '\033')
+            {
+                fputc('\033', tty_out);
+            }
+            fputc(buf[i], tty_out);
+        }
+        fputs("\033\\", tty_out);
+    }
+    else
+    {
+        fwrite(buf, 1, n, tty_out);
     }
 
     fflush(tty_out);

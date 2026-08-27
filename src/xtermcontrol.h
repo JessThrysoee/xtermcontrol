@@ -52,7 +52,6 @@ char *ctty_path(void);
 void raw_print(char *ctlseq);
 ssize_t tty_read(char *output, size_t size);
 
-char *tmux_dcs_passthrough(char *ctlseq);
 void set_tty_raw(void);
 void set_tty_restore(void);
 
