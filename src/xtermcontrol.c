@@ -1444,7 +1444,7 @@ void tty_control()
     if (!isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO))
     {
         /* get controlling terminal */
-        if ((ctty = fopen(ctty_path(), "r+")) == NULL)
+        if ((ctty = fopen("/dev/tty", "r+")) == NULL)
         {
             fprintf(stderr, "%s: failed to get controlling terminal\n", program_name);
             exit(EXIT_FAILURE);
@@ -1472,29 +1472,6 @@ void tty_control()
     }
 
     set_tty_raw();
-}
-
-/*=****************************************************************************
-**
-** DESCRIPTION : find path to controlling terminal
-**
-** RETURN VALUE:
-**                                                                           */
-/*=***************************************************************************/
-char *ctty_path(void)
-{
-    int i;
-    char *tty_path = NULL;
-
-    for (i = 0; i <= 2; i++)
-    {
-        if ((tty_path = ttyname(i)))
-        {
-            break;
-        }
-    }
-
-    return tty_path;
 }
 
 /*=****************************************************************************
