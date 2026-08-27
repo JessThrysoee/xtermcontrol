@@ -6,36 +6,98 @@ export XTC
 
 fail=0
 
-check() {
-   desc=$1
-   expected=$2
-   shift 2
+run() {
    out=`"$PTYTEST" "$@"`
-   if test "x$out" = "x$expected"
+   got_status=`printf '%s\n' "$out" | sed -n 's/.*status=//p'`
+   got_output=`printf '%s\n' "$out" | sed -n 's/^output: //p'`
+   case "$out" in
+      *TIMEOUT*) got_status=TIMEOUT ;;
+   esac
+}
+
+report() {
+   if test "$ok" = 1
    then
       echo "ok: $desc"
    else
-      echo "FAIL: $desc: got '$out', want '$expected'"
+      echo "FAIL: $desc: status '$got_status', output '$got_output'"
       fail=1
    fi
+}
+
+check() {
+   desc=$1
+   wantst=$2
+   shift 2
+   run "$@"
+   ok=1
+   test "x$got_status" = "x$wantst" || ok=0
+   report
+}
+
+check_out() {
+   desc=$1
+   wantst=$2
+   wantout=$3
+   shift 3
+   run "$@"
+   ok=1
+   test "x$got_status" = "x$wantst" || ok=0
+   case "$got_output" in
+      *"$wantout"*) ;;
+      *) ok=0 ;;
+   esac
+   report
+}
+
+check_not_out() {
+   desc=$1
+   wantst=$2
+   notout=$3
+   shift 3
+   run "$@"
+   ok=1
+   test "x$got_status" = "x$wantst" || ok=0
+   case "$got_output" in
+      *"$notout"*) ok=0 ;;
+   esac
+   report
 }
 
 esc=`printf '\033'`
 bel=`printf '\007'`
 st="$esc\\"
 
-check "truncated title reply"    "child exited, status=1" --get-title "${esc}]lhello"
-check "one-byte reply"           "child exited, status=1" --get-title "$esc"
-check "truncated geometry reply" "child exited, status=1" --get-geometry "${esc}[8;24;80"
-check "reply without semicolon"  "child exited, status=1" --get-bg "${esc}]garbage$bel"
-check "no reply exits nonzero"   "child exited, status=1" --get-bg ""
-check "bel-terminated title"     "child exited, status=0" --get-title "${esc}]lhello$bel"
-check "st-terminated title"      "child exited, status=0" --get-title "${esc}]lhello$st"
-check "get-bg"                   "child exited, status=0" --get-bg "${esc}]11;rgb:ff/ff/ff$bel"
-check "get-color"                "child exited, status=0" --get-color99 "${esc}]4;99;rgb:aa/bb/cc$bel"
-check "invalid geometry"         "child exited, status=1" --geometry=nonsense ""
-check "set bg"                   "child exited, status=0" --bg=white ""
-check "set color"                "child exited, status=0" --color88=red ""
-check "reset"                    "child exited, status=0" --reset ""
+check "truncated title reply"    1 --get-title -- "${esc}]lhello"
+check "one-byte reply"           1 --get-title -- "$esc"
+check "truncated geometry reply" 1 --get-geometry -- "${esc}[8;24;80"
+check "reply without semicolon"  1 --get-bg -- "${esc}]garbage$bel"
+check "no reply exits nonzero"   1 --get-bg --
+check "bel-terminated title"     0 --get-title -- "${esc}]lhello$bel"
+check "st-terminated title"      0 --get-title -- "${esc}]lhello$st"
+check "invalid geometry"         1 --geometry=nonsense --
+check "reset"                    0 --reset --
+
+check_out "get-bg reports color"    0 'rgb:ff/ff/ff'    --get-bg -- "${esc}]11;rgb:ff/ff/ff$bel"
+check_out "get-color reports color" 0 'rgb:aa/bb/cc'    --get-color99 -- "${esc}]4;99;rgb:aa/bb/cc$bel"
+check_out "get-title reports title" 0 'hello'           --get-title -- "${esc}]lhello$bel"
+check_out "get-geometry"            0 '80x24+10+20'     --get-geometry -- "${esc}[8;24;80t" "${esc}[3;10;20t"
+
+check_out "set bg emits osc"        0 '\e]11;white\e'   --bg=white --
+check_out "set color emits osc"     0 '\e]4;88;red\e'   --color88=red --
+check_out "command-line order"      0 '\ec\e]11;red\e'  --reset --bg=red --
+
+PTY_TMUX=1 check_out "tmux wraps osc in dcs" 0 \
+   '\ePtmux;\e\e]11;white\e\e\\e\' --bg=white --
+
+confdir=`mktemp -d "${TMPDIR:-/tmp}/ptytest.XXXXXX"` || exit 1
+trap 'rm -rf "$confdir"' 0
+cat > "$confdir/.xtermcontrol" <<EOF
+foreground =
+background = white # comment
+EOF
+
+PTY_HOME=$confdir check_out     "config trims trailing whitespace" 0 '\e]11;white\e' --
+PTY_HOME=$confdir check_not_out "config skips empty value"         0 '\e]10;'        --
 
 exit $fail
