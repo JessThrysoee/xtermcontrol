@@ -20,3 +20,6 @@ src/xtermcontrol
 tests/xtermcontrol.sh
 
 tests/ptytest
+tests/.deps
+tests/*.log
+tests/*.trs
