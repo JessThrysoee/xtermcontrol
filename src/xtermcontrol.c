@@ -1395,7 +1395,7 @@ static int process_ctlseq(unsigned int i, char *text, int verbose)
 
     default:
         fprintf(stderr, "unknown type: %d\n", type);
-        exit(EXIT_FAILURE);
+        do_exit(EXIT_FAILURE);
     }
 
     return 0;
