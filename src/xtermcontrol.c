@@ -1267,7 +1267,7 @@ int main(int argc, char **argv)
             /* user specified configuration file */
             if (configuration_read(&list, configuration_file) == -1)
             {
-                fprintf(stderr, "%s: %s: No such file or directory\n", program_name, configuration_file);
+                fprintf(stderr, "%s: %s: %s\n", program_name, configuration_file, strerror(errno));
                 do_exit(EXIT_FAILURE);
             }
         }
