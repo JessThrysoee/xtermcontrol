@@ -1704,7 +1704,7 @@ int get_title(char *title, size_t size, int verbose, int ctl1)
         return -1;
     }
 
-    while (!(s[n - 2] == '\033' && s[n - 1] == '\\'))
+    while (n < 2 || !(s[n - 2] == '\033' && s[n - 1] == '\\'))
     {
         r = tty_read(s + n, sizeof(s) - n);
         if (r == 0)
@@ -1930,6 +1930,11 @@ int get_geometry(char *geometry, size_t size, int verbose, int ctl1, int ctl2)
         n += r;
     }
 
+    if (n < 5)
+    {
+        return -1;
+    }
+
     /* n-1: discard t */
     local_temp[n - 1] = '\0';
 
@@ -1958,6 +1963,11 @@ int get_geometry(char *geometry, size_t size, int verbose, int ctl1, int ctl2)
             return -1;
         }
         n += r;
+    }
+
+    if (n < 5)
+    {
+        return -1;
     }
 
     /* n-1: discard t */
