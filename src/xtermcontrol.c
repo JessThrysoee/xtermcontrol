@@ -1704,7 +1704,7 @@ int get_title(char *title, size_t size, int verbose, int ctl1)
         return -1;
     }
 
-    while (n < 2 || !(s[n - 2] == '\033' && s[n - 1] == '\\'))
+    while ((s[n - 1] != '\007') && (n < 2 || !(s[n - 2] == '\033' && s[n - 1] == '\\')))
     {
         r = tty_read(s + n, sizeof(s) - n);
         if (r == 0)
@@ -1714,8 +1714,14 @@ int get_title(char *title, size_t size, int verbose, int ctl1)
         n += r;
     }
 
-    /* n-2: discard ST */
-    s[n - 2] = '\0';
+    if (s[n - 1] == '\007')
+    {
+        s[n - 1] = '\0';
+    }
+    else
+    {
+        s[n - 2] = '\0';
+    }
 
     /* s+3: discard OSC l */
     if (!verbose)
