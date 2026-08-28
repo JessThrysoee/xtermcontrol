@@ -43,6 +43,7 @@ static struct option longopts[NSEQ + 5];
 static int process_ctlseq(unsigned int i, char *text, int verbose);
 static void on_signal(int sig);
 static void init_longopts(void);
+static void strip_ctl_chars(char *s);
 
 /*=****************************************************************************
 **
@@ -666,6 +667,24 @@ void csi_print3(int ctl1, int ctl2, int ctl3)
     raw_print(buf);
 }
 
+/* Replies are untrusted terminal input. Strip C0 controls and DEL, but not
+ * C1 0x80-0x9f which would corrupt UTF-8, so a hostile terminal cannot
+ * inject control sequences into reported values. */
+static void strip_ctl_chars(char *s)
+{
+    char *from,
+        *to;
+
+    for (from = to = s; *from; from++)
+    {
+        if ((unsigned char)*from >= 0x20 && *from != 0x7f)
+        {
+            *to++ = *from;
+        }
+    }
+    *to = '\0';
+}
+
 /*=****************************************************************************
 **
 ** DESCRIPTION :
@@ -708,6 +727,13 @@ int get_title(char *title, size_t size, int verbose, int ctl1)
     {
         s[n - 2] = '\0';
     }
+
+    if (strncmp(s, "\033]l", 3) != 0)
+    {
+        return -1;
+    }
+
+    strip_ctl_chars(s + 3);
 
     /* s+3: discard OSC l */
     if (!verbose)
@@ -829,6 +855,8 @@ int get_osc(char *osc, size_t size, int verbose, unsigned int option, int ctl1, 
     }
 
     ++p;
+
+    strip_ctl_chars(p);
 
     if (!verbose)
     {

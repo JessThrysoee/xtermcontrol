@@ -78,6 +78,7 @@ check "one-byte reply"           1 --get-title -- "$esc"
 check "truncated geometry reply" 1 --get-geometry -- "${esc}[8;24;80"
 check "reply without semicolon"  1 --get-bg -- "${esc}]garbage$bel"
 check "no reply exits nonzero"   1 --get-bg --
+check "title reply without osc prefix" 1 --get-title -- "garbage$bel"
 check "bel-terminated title"     0 --get-title -- "${esc}]lhello$bel"
 check "st-terminated title"      0 --get-title -- "${esc}]lhello$st"
 check "invalid geometry"         1 --geometry=nonsense --
@@ -87,6 +88,9 @@ check_out "get-bg reports color"    0 'rgb:ff/ff/ff'    --get-bg -- "${esc}]11;r
 check_out "get-color reports color" 0 'rgb:aa/bb/cc'    --get-color99 -- "${esc}]4;99;rgb:aa/bb/cc$bel"
 check_out "get-title reports title" 0 'hello'           --get-title -- "${esc}]lhello$bel"
 check_out "get-geometry"            0 '80x24+10+20'     --get-geometry -- "${esc}[8;24;80t" "${esc}[3;10;20t"
+
+check_not_out "get-title strips control chars" 0 'AB' 'A\eB' --get-title -- "${esc}]lA${esc}B$bel"
+check_not_out "get-bg strips control chars"    0 'rgb' 'rg\eb' --get-bg -- "${esc}]11;rg${esc}b$bel"
 
 check_out "set bg emits osc"        0 '\e]11;white\e'   --bg=white --
 check_out "set color emits osc"     0 '\e]4;88;red\e'   --color88=red --
