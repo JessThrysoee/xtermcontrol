@@ -14,3 +14,8 @@ Requires autoconf and automake.
 
 Release tarballs include the generated configure script, so they build
 with just `./configure && make`.
+
+To remove all generated files and restore a pristine tree:
+
+    git clean -dXf
+
