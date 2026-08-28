@@ -16,6 +16,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: install autotools
+        if: runner.os == 'macOS'
+        run: brew install autoconf automake
+
+      - name: bootstrap
+        run: autoreconf -fi
+
       - name: configure
         run: ./configure CFLAGS="-g -O2 -Wall -Wextra"
 
