@@ -33,3 +33,20 @@ jobs:
       - name: show test logs
         if: failure()
         run: cat tests/test-suite.log tests/regression.log || true
+
+  freebsd:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: build and test on FreeBSD
+        uses: vmactions/freebsd-vm@v1
+        with:
+          usesh: true
+          prepare: pkg install -y autoconf automake gmake
+          run: |
+            set -e
+            autoreconf -fi
+            ./configure CFLAGS="-g -O2 -Wall -Wextra"
+            gmake
+            gmake check || { cat tests/test-suite.log tests/regression.log; exit 1; }
