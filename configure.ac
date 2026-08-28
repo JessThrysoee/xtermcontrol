@@ -8,7 +8,7 @@
 #    "./configure --disable-silent-rules" or "make V=1"
 #
 
-AC_INIT([xtermcontrol],[3.10],[])
+AC_INIT([xtermcontrol],[3.11],[])
 AC_CONFIG_SRCDIR([src/xtermcontrol.c])
 AC_CONFIG_HEADERS([config.h])
 

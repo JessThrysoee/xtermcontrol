@@ -1,3 +1,40 @@
+2026-08-28  Jess Thrysoee
+
+   * Version 3.11
+
+   * src/xtermcontrol.c: Fix tmux passthrough of OSC sequences, broken since
+	the switch to ST terminators in 3.5; setting colors and title works
+	under tmux again.
+
+   * src/xtermcontrol.c: Never hang or crash on truncated or malformed query
+	replies; report an error instead. Strip control characters from
+	reported values so a hostile terminal cannot inject escape sequences.
+
+   * src/xtermcontrol.c: get-title: accept BEL-terminated replies.
+
+   * src/xtermcontrol.c: Exit nonzero when a query fails. Report invalid
+	--geometry arguments instead of silently ignoring them.
+
+   * src/xtermcontrol.c: Apply options in command-line order, so
+	'--reset --bg=red' resets before setting the color.
+
+   * src/xtermcontrol.c: --force and --verbose alone no longer suppress the
+	configuration file.
+
+   * src/xtermcontrol.c: Accept tmux TERM values, or TMUX set, in the TERM
+	check.
+
+   * src/xtermcontrol.c: --file: expand '~' only in '~/' paths; report unset
+	HOME instead of misbehaving.
+
+   * src/xtermcontrol.c: Open /dev/tty for the controlling terminal, so
+	redirecting all of stdin/stdout/stderr works. Restore terminal
+	settings when killed by a signal.
+
+   * src/configuration.c: Trim trailing whitespace from configuration values,
+	e.g. 'background = white # comment', and warn on empty values. Report
+	configuration file errors with the actual reason, not always ENOENT.
+
 2025-01-14  Jess Thrysoee
 
    * Version 3.10
