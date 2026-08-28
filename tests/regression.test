@@ -87,8 +87,10 @@ check_out "set bg emits osc"        0 '\e]11;white\e'   --bg=white --
 check_out "set color emits osc"     0 '\e]4;88;red\e'   --color88=red --
 check_out "command-line order"      0 '\ec\e]11;red\e'  --reset --bg=red --
 
-PTY_TMUX=1 check_out "tmux wraps osc in dcs" 0 \
+export PTY_TMUX=1
+check_out "tmux wraps osc in dcs" 0 \
    '\ePtmux;\e\e]11;white\e\e\\e\' --bg=white --
+unset PTY_TMUX
 
 confdir=`mktemp -d "${TMPDIR:-/tmp}/ptytest.XXXXXX"` || exit 1
 trap 'rm -rf "$confdir"' 0
@@ -97,7 +99,9 @@ foreground =
 background = white # comment
 EOF
 
-PTY_HOME=$confdir check_out     "config trims trailing whitespace" 0 '\e]11;white\e' --
-PTY_HOME=$confdir check_not_out "config skips empty value"         0 '\e]10;'        --
+export PTY_HOME=$confdir
+check_out     "config trims trailing whitespace" 0 '\e]11;white\e' --
+check_not_out "config skips empty value"         0 '\e]10;'        --
+unset PTY_HOME
 
 exit $fail
