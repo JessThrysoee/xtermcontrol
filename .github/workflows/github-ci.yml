@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: install autotools
+        if: runner.os == 'macOS'
+        run: brew install autoconf automake
+
+      - name: bootstrap
+        run: autoreconf -fi
+
+      - name: configure
+        run: ./configure CFLAGS="-g -O2 -Wall -Wextra"
+
+      - run: make
+      - run: make check
+      - run: make distcheck
+
+      - name: show test logs
+        if: failure()
+        run: cat tests/test-suite.log tests/regression.log || true
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [build, freebsd]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: build release tarball
+        run: |
+          autoreconf -fi
+          ./configure
+          make distcheck
+
+      - name: create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" xtermcontrol-*.tar.gz
+
+  freebsd:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: build and test on FreeBSD
+        uses: vmactions/freebsd-vm@v1
+        with:
+          usesh: true
+          prepare: pkg install -y autoconf automake gmake
+          run: |
+            set -e
+            autoreconf -fi
+            ./configure CFLAGS="-g -O2 -Wall -Wextra"
+            gmake
+            gmake check || { cat tests/test-suite.log tests/regression.log; exit 1; }

@@ -15,7 +15,7 @@ $(PACKAGE).1: $(ROOTNAME).roff
 	echo '.\" troff' > $@;\
 	echo ".TH $$PACKAGE_CAPS 1 \"$(PACKAGE_DATE)\" \"$(PACKAGE) $(VERSION)\" \"User Commands\"" >> $@;\
 	cat $(srcdir)/$(ROOTNAME).roff >> $@;\
-	echo "Copyright \(co 2002-$(PACKAGE_YEAR) Jess Thrysoee <jess@thrysoee.dk>" >> $@;
+	echo "Copyright \(co 2002-2026 Jess Thrysoee <jess@thrysoee.dk>" >> $@;
 
 changelog.txt: ../ChangeLog
 	@sed 's/@/ (at)/g;s/&/\&amp;/g;s/</\&lt;/g;s/>/\&gt;/g' $(srcdir)/$< > $@;

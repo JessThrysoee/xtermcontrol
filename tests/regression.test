@@ -1,0 +1,116 @@
+#!/bin/sh
+
+XTC=${XTC:-../src/xtermcontrol}
+PTYTEST=${PTYTEST:-./ptytest}
+export XTC
+
+fail=0
+
+run() {
+   out=`"$PTYTEST" "$@"`
+   got_status=`printf '%s\n' "$out" | sed -n 's/.*status=//p'`
+   got_output=`printf '%s\n' "$out" | sed -n 's/^output: //p'`
+   case "$out" in
+      *TIMEOUT*) got_status=TIMEOUT ;;
+   esac
+}
+
+report() {
+   if test "$ok" = 1
+   then
+      echo "ok: $desc"
+   else
+      echo "FAIL: $desc: status '$got_status', output '$got_output'"
+      fail=1
+   fi
+}
+
+check() {
+   desc=$1
+   wantst=$2
+   shift 2
+   run "$@"
+   ok=1
+   test "x$got_status" = "x$wantst" || ok=0
+   report
+}
+
+check_out() {
+   desc=$1
+   wantst=$2
+   wantout=$3
+   shift 3
+   run "$@"
+   ok=1
+   test "x$got_status" = "x$wantst" || ok=0
+   case "$got_output" in
+      *"$wantout"*) ;;
+      *) ok=0 ;;
+   esac
+   report
+}
+
+check_not_out() {
+   desc=$1
+   wantst=$2
+   wantout=$3
+   notout=$4
+   shift 4
+   run "$@"
+   ok=1
+   test "x$got_status" = "x$wantst" || ok=0
+   case "$got_output" in
+      *"$wantout"*) ;;
+      *) ok=0 ;;
+   esac
+   case "$got_output" in
+      *"$notout"*) ok=0 ;;
+   esac
+   report
+}
+
+esc=`printf '\033'`
+bel=`printf '\007'`
+st="$esc\\"
+
+check "truncated title reply"    1 --get-title -- "${esc}]lhello"
+check "one-byte reply"           1 --get-title -- "$esc"
+check "truncated geometry reply" 1 --get-geometry -- "${esc}[8;24;80"
+check "reply without semicolon"  1 --get-bg -- "${esc}]garbage$bel"
+check "no reply exits nonzero"   1 --get-bg --
+check "title reply without osc prefix" 1 --get-title -- "garbage$bel"
+check "bel-terminated title"     0 --get-title -- "${esc}]lhello$bel"
+check "st-terminated title"      0 --get-title -- "${esc}]lhello$st"
+check "invalid geometry"         1 --geometry=nonsense --
+check "reset"                    0 --reset --
+
+check_out "get-bg reports color"    0 'rgb:ff/ff/ff'    --get-bg -- "${esc}]11;rgb:ff/ff/ff$bel"
+check_out "get-color reports color" 0 'rgb:aa/bb/cc'    --get-color99 -- "${esc}]4;99;rgb:aa/bb/cc$bel"
+check_out "get-title reports title" 0 'hello'           --get-title -- "${esc}]lhello$bel"
+check_out "get-geometry"            0 '80x24+10+20'     --get-geometry -- "${esc}[8;24;80t" "${esc}[3;10;20t"
+
+check_not_out "get-title strips control chars" 0 'AB' 'A\eB' --get-title -- "${esc}]lA${esc}B$bel"
+check_not_out "get-bg strips control chars"    0 'rgb' 'rg\eb' --get-bg -- "${esc}]11;rg${esc}b$bel"
+
+check_out "set bg emits osc"        0 '\e]11;white\e'   --bg=white --
+check_out "set color emits osc"     0 '\e]4;88;red\e'   --color88=red --
+check_out "command-line order"      0 '\ec\e]11;red\e'  --reset --bg=red --
+
+export PTY_TMUX=1
+check_out "tmux wraps osc in dcs" 0 \
+   '\ePtmux;\e\e]11;white\e\e\\e\' --bg=white --
+unset PTY_TMUX
+
+confdir=`mktemp -d "${TMPDIR:-/tmp}/ptytest.XXXXXX"` || exit 1
+trap 'rm -rf "$confdir"' 0
+cat > "$confdir/.xtermcontrol" <<EOF
+foreground =
+background = white # comment
+EOF
+
+export PTY_HOME=$confdir
+check_out     "config trims trailing whitespace" 0 '\e]11;white\e' --
+check_not_out "config skips empty value"         0 '\e]11;white\e' '\e]10;' --
+unset PTY_HOME
+
+exit $fail

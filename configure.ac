@@ -15,7 +15,6 @@ AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE
 
 XTC_PACKAGE_DATE
-XTC_PACKAGE_YEAR
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
@@ -29,7 +28,8 @@ AC_USE_SYSTEM_EXTENSIONS
 AC_CHECK_INCLUDES_DEFAULT
 AC_PROG_EGREP
 
-AC_CHECK_HEADERS([fcntl.h libintl.h stdlib.h string.h strings.h termios.h unistd.h wchar.h])
+AC_CHECK_HEADERS([fcntl.h libintl.h stdlib.h string.h strings.h termios.h unistd.h wchar.h pty.h util.h libutil.h])
+AC_SEARCH_LIBS([forkpty], [util])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
