@@ -19,3 +19,5 @@ To remove all generated files and restore a pristine tree:
 
     git clean -dXf
 
+Homepage: https://thrysoee.dk/xtermcontrol/
+
