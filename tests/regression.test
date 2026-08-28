@@ -53,11 +53,16 @@ check_out() {
 check_not_out() {
    desc=$1
    wantst=$2
-   notout=$3
-   shift 3
+   wantout=$3
+   notout=$4
+   shift 4
    run "$@"
    ok=1
    test "x$got_status" = "x$wantst" || ok=0
+   case "$got_output" in
+      *"$wantout"*) ;;
+      *) ok=0 ;;
+   esac
    case "$got_output" in
       *"$notout"*) ok=0 ;;
    esac
@@ -101,7 +106,7 @@ EOF
 
 export PTY_HOME=$confdir
 check_out     "config trims trailing whitespace" 0 '\e]11;white\e' --
-check_not_out "config skips empty value"         0 '\e]10;'        --
+check_not_out "config skips empty value"         0 '\e]11;white\e' '\e]10;' --
 unset PTY_HOME
 
 exit $fail
