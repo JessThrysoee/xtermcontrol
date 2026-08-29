@@ -17,7 +17,7 @@ test: $(PACKAGE).sh
 	./$(PACKAGE).sh
 
 $(PACKAGE).sh: $(ROOTNAME).test
-	@echo '#! /bin/sh -e' > $@;\
+	@echo '#!/bin/sh' > $@;\
 	echo ' ' >> $@;\
 	echo "XTC=\"../src/$(PACKAGE)\"" >> $@;\
 	cat $(srcdir)/$(ROOTNAME).test >> $@;\
