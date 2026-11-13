@@ -300,7 +300,11 @@ static int process_ctlseq(unsigned int i, char *text, int verbose)
         break;
 
     case OSC:
-        osc_print(ctl1, ctl2, text);
+        if (osc_print(ctl1, ctl2, text) < 0)
+        {
+            fprintf(stderr, "%s: --%s: value too long\n", program_name, ctlseqstab[i].option);
+            return -1;
+        }
         break;
 
     case GET_OSC:
@@ -316,7 +320,11 @@ static int process_ctlseq(unsigned int i, char *text, int verbose)
         break;
 
     case ANY:
-        raw_print(text);
+        if (raw_print(text) < 0)
+        {
+            fprintf(stderr, "%s: --%s: value too long\n", program_name, ctlseqstab[i].option);
+            return -1;
+        }
         break;
 
     default:
@@ -488,7 +496,7 @@ static void on_signal(int sig)
 ** RETURN VALUE:
 **                                                                           */
 /*=***************************************************************************/
-void raw_print(char *ctlseq)
+int raw_print(char *ctlseq)
 {
     int c;
     size_t n,
@@ -497,8 +505,12 @@ void raw_print(char *ctlseq)
 
     n = 0;
 
-    while ((c = *ctlseq++) && n < sizeof(buf) - 1)
+    while ((c = *ctlseq++))
     {
+        if (n >= sizeof(buf) - 1)
+        {
+            return -1;
+        }
         if (c == '\\' && *ctlseq)
         {
             switch (c = *ctlseq++)
@@ -576,6 +588,8 @@ void raw_print(char *ctlseq)
     }
 
     fflush(tty_out);
+
+    return 0;
 }
 
 /*=****************************************************************************
@@ -760,33 +774,39 @@ int get_title(char *title, size_t size, int verbose, int ctl1)
 ** RETURN VALUE:
 **                                                                           */
 /*=***************************************************************************/
-void osc_print(int ps1, int ps2, char *pt)
+int osc_print(int ps1, int ps2, char *pt)
 {
     char buf[BUFSIZ];
+    int len;
 
     if (pt && *pt)
     {
         if (ps1 == 4)
         {
             /* colorN */
-            snprintf(buf, sizeof(buf), "\033]%d;%d;%s\033\\", ps1, ps2, pt);
+            len = snprintf(buf, sizeof(buf), "\033]%d;%d;%s\033\\", ps1, ps2, pt);
         }
         else
         {
-            snprintf(buf, sizeof(buf), "\033]%d;%s\033\\", ps1, pt);
+            len = snprintf(buf, sizeof(buf), "\033]%d;%s\033\\", ps1, pt);
         }
     }
     else if (ps1 == 4)
     {
         /* colorN */
-        snprintf(buf, sizeof(buf), "\033]%d;%d;?\033\\", ps1, ps2);
+        len = snprintf(buf, sizeof(buf), "\033]%d;%d;?\033\\", ps1, ps2);
     }
     else
     {
-        snprintf(buf, sizeof(buf), "\033]%d;?\033\\", ps1);
+        len = snprintf(buf, sizeof(buf), "\033]%d;?\033\\", ps1);
     }
 
-    raw_print(buf);
+    if (len < 0 || (size_t)len >= sizeof(buf))
+    {
+        return -1;
+    }
+
+    return raw_print(buf);
 }
 
 /*=****************************************************************************

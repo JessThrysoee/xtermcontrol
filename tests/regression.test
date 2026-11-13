@@ -85,6 +85,10 @@ check "st-terminated title"      0 --get-title -- "${esc}]lhello$st"
 check "invalid geometry"         1 --geometry=nonsense --
 check "reset"                    0 --reset --
 
+long=`printf '%010000d' 0`
+check "long title rejected"      1 --title="$long" --
+check "long raw rejected"        1 --raw="$long" --
+
 check_out "get-bg reports color"    0 'rgb:ff/ff/ff'    --get-bg -- "${esc}]11;rgb:ff/ff/ff$bel"
 check_out "get-color reports color" 0 'rgb:aa/bb/cc'    --get-color99 -- "${esc}]4;99;rgb:aa/bb/cc$bel"
 check_out "get-title reports title" 0 'hello'           --get-title -- "${esc}]lhello$bel"
