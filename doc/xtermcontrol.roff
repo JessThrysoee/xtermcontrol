@@ -20,6 +20,12 @@ are also supported.
 
 To complete the feature set; xtermcontrol lets advanced users issue any xterm control
 sequence of their choosing.
+
+Option values are sent to the terminal verbatim; only \fB\-\-raw\fR interprets
+backslash escapes. A value, including the surrounding control sequence, must be
+shorter than BUFSIZ bytes (platform dependent, typically 1024 or 8192); longer
+values are rejected. Reported values have C0 control characters, DEL and
+U+0080..U+009F removed.
 .br
 .\"
 .\"   "OPTIONS"
@@ -89,6 +95,9 @@ Lower window.
 Full reset.
 .IP "\fB\-\-raw\fR=\fICTLSEQS\fR"
 Issue raw control sequence (see also \fBXTERM CONTROL SEQUENCES\fR).
+The backslash escapes \(rse, \(rsa, \(rsb, \(rsf, \(rsn, \(rsr, \(rst, \(rsv,
+\(rs\(rs and \(rs\fINNN\fR (octal) are expanded, e.g.
+\-\-raw=\(aq\(rse]0;title\(rsa\(aq.
 .IP "\fB\-\-file\fR=\fIFILE\fR"
 Source a configuration \fIFILE\fR (see also \fBCONFIGURATION\fR).
 .IP "\fB\-\-force\fR, \fB\-f\fR"

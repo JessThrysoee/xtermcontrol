@@ -1,3 +1,26 @@
+2026-11-13  Jess Thrysoee
+
+   * src/xtermcontrol.c: Strip UTF-8 encoded C1 controls (U+0080..U+009F)
+	from reported values; xterm treats e.g. U+009B as CSI.
+
+   * src/xtermcontrol.c: Reject set and --raw values too long for the
+	control sequence buffer instead of truncating the terminator, which
+	left the terminal swallowing all following output.
+
+   * src/xtermcontrol.c: Expand backslash escapes only for --raw. Values of
+	--title, --font, colors etc. are now sent verbatim, so an untrusted
+	title cannot emit control sequences. Deliberate behaviour change:
+	'--title=foo\nbar' no longer contains a newline.
+
+   * .github/workflows/github-ci.yml: Pin actions to commit SHAs and
+	default to read-only token permissions.
+
+   * src/xtermcontrol.c: Create the default ~/.xtermcontrol only if it does
+	not exist, and never through a symlink; warn instead of failing.
+
+   * doc/xtermcontrol.roff: Document escape expansion, value length limit
+	and stripping of reported values.
+
 2026-08-28  Jess Thrysoee
 
    * Version 3.11
