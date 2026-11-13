@@ -51,6 +51,7 @@ void csi_print3(int ctl1, int ctl2, int ctl3);
 int osc_print(int ps1, int ps2, char *pt);
 
 void tty_control(void);
+void tty_write(const char *buf, size_t n);
 int raw_print(char *ctlseq);
 ssize_t tty_read(char *output, size_t size);
 

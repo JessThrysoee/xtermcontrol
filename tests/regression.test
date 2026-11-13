@@ -103,6 +103,9 @@ check_not_out "get-bg strips utf8 C1"    0 'rgb:ff' "$c1csi" \
 
 check_out "set bg emits osc"        0 '\e]11;white\e'   --bg=white --
 check_out "set color emits osc"     0 '\e]4;88;red\e'   --color88=red --
+check_not_out "title does not expand escapes" 0 'C:\new\e]0;pwned\a\e\' 'C:\r' \
+   --title='C:\new\e]0;pwned\a' --
+check_out "raw expands escapes"     0 'a\r\nb'         --raw='a\nb' --
 check_out "command-line order"      0 '\ec\e]11;red\e'  --reset --bg=red --
 
 export PTY_TMUX=1

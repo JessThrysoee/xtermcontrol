@@ -491,16 +491,48 @@ static void on_signal(int sig)
 
 /*=****************************************************************************
 **
-** DESCRIPTION : issue raw escape sequence.
+** DESCRIPTION : write a control sequence to the terminal, wrapped for tmux
+**               passthrough if needed.
 **
 ** RETURN VALUE:
+**                                                                           */
+/*=***************************************************************************/
+void tty_write(const char *buf, size_t n)
+{
+    size_t i;
+
+    if (getenv("TMUX"))
+    {
+        fputs("\033Ptmux;", tty_out);
+        for (i = 0; i < n; i++)
+        {
+            if (buf[i] == '\033')
+            {
+                fputc('\033', tty_out);
+            }
+            fputc(buf[i], tty_out);
+        }
+        fputs("\033\\", tty_out);
+    }
+    else
+    {
+        fwrite(buf, 1, n, tty_out);
+    }
+
+    fflush(tty_out);
+}
+
+/*=****************************************************************************
+**
+** DESCRIPTION : issue raw escape sequence, expanding backslash escapes.
+**
+** RETURN VALUE: 0, or -1 if the expanded sequence does not fit the buffer
 **                                                                           */
 /*=***************************************************************************/
 int raw_print(char *ctlseq)
 {
     int c;
-    size_t n,
-        i;
+    size_t n;
     static char buf[BUFSIZ];
 
     n = 0;
@@ -569,25 +601,7 @@ int raw_print(char *ctlseq)
         buf[n++] = c;
     }
 
-    if (getenv("TMUX"))
-    {
-        fputs("\033Ptmux;", tty_out);
-        for (i = 0; i < n; i++)
-        {
-            if (buf[i] == '\033')
-            {
-                fputc('\033', tty_out);
-            }
-            fputc(buf[i], tty_out);
-        }
-        fputs("\033\\", tty_out);
-    }
-    else
-    {
-        fwrite(buf, 1, n, tty_out);
-    }
-
-    fflush(tty_out);
+    tty_write(buf, n);
 
     return 0;
 }
@@ -646,9 +660,10 @@ ssize_t tty_read(char *output, size_t size)
 void csi_print1(int ctl1)
 {
     char buf[BUFSIZ];
+    int len;
 
-    snprintf(buf, sizeof(buf), "\033[%dt", ctl1);
-    raw_print(buf);
+    len = snprintf(buf, sizeof(buf), "\033[%dt", ctl1);
+    tty_write(buf, len);
 }
 
 /*=****************************************************************************
@@ -661,9 +676,10 @@ void csi_print1(int ctl1)
 void csi_print2(int ctl1, int ctl2)
 {
     char buf[BUFSIZ];
+    int len;
 
-    snprintf(buf, sizeof(buf), "\033[%d;%dt", ctl1, ctl2);
-    raw_print(buf);
+    len = snprintf(buf, sizeof(buf), "\033[%d;%dt", ctl1, ctl2);
+    tty_write(buf, len);
 }
 
 /*=****************************************************************************
@@ -676,9 +692,10 @@ void csi_print2(int ctl1, int ctl2)
 void csi_print3(int ctl1, int ctl2, int ctl3)
 {
     char buf[BUFSIZ];
+    int len;
 
-    snprintf(buf, sizeof(buf), "\033[%d;%d;%dt", ctl1, ctl2, ctl3);
-    raw_print(buf);
+    len = snprintf(buf, sizeof(buf), "\033[%d;%d;%dt", ctl1, ctl2, ctl3);
+    tty_write(buf, len);
 }
 
 /* Replies are untrusted terminal input. Strip C0 controls, DEL and UTF-8
@@ -806,7 +823,9 @@ int osc_print(int ps1, int ps2, char *pt)
         return -1;
     }
 
-    return raw_print(buf);
+    tty_write(buf, len);
+
+    return 0;
 }
 
 /*=****************************************************************************
