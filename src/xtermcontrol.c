@@ -12,6 +12,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -179,7 +180,7 @@ int main(int argc, char **argv)
             {
                 /* default ~/.program_name configuration file */
                 snprintf(configuration_file, sizeof(configuration_file), "%s/.%s", home, program_name);
-                if (configuration_read(&list, configuration_file) == -1)
+                if (configuration_read(&list, configuration_file) == -1 && errno == ENOENT)
                 {
                     configuration_missing = 1;
                 }
@@ -223,10 +224,7 @@ int main(int argc, char **argv)
 
     if (configuration_missing)
     {
-        if (configuration_write(configuration_file) < 0)
-        {
-            do_exit(EXIT_FAILURE);
-        }
+        configuration_write(configuration_file);
     }
 
     do_exit(failed ? EXIT_FAILURE : EXIT_SUCCESS);
@@ -1133,11 +1131,16 @@ void version(void)
 int configuration_write(const char *filepath)
 {
     FILE *fp;
+    int fd;
 
-    fp = fopen(filepath, "w");
-    if (fp == NULL)
+    fd = open(filepath, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW, 0644);
+    if (fd == -1 || (fp = fdopen(fd, "w")) == NULL)
     {
-        perror("configuration_write");
+        fprintf(stderr, "%s: warning: %s: %s\n", program_name, filepath, strerror(errno));
+        if (fd != -1)
+        {
+            close(fd);
+        }
         return -1;
     }
 

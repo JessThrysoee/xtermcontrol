@@ -123,6 +123,27 @@ EOF
 export PTY_HOME=$confdir
 check_out     "config trims trailing whitespace" 0 '\e]11;white\e' --
 check_not_out "config skips empty value"         0 '\e]11;white\e' '\e]10;' --
+
+newhome=$confdir/new
+mkdir "$newhome"
+export PTY_HOME=$newhome
+desc="missing config is created"
+run --
+ok=1
+test "x$got_status" = x0 || ok=0
+test -f "$newhome/.xtermcontrol" || ok=0
+report
+
+linkhome=$confdir/link
+mkdir "$linkhome"
+ln -s "$linkhome/target" "$linkhome/.xtermcontrol"
+export PTY_HOME=$linkhome
+desc="config write does not follow symlink"
+run --
+ok=1
+test "x$got_status" = x0 || ok=0
+test -e "$linkhome/target" && ok=0
+report
 unset PTY_HOME
 
 exit $fail
