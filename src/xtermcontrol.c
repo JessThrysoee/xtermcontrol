@@ -667,9 +667,10 @@ void csi_print3(int ctl1, int ctl2, int ctl3)
     raw_print(buf);
 }
 
-/* Replies are untrusted terminal input. Strip C0 controls and DEL, but not
- * C1 0x80-0x9f which would corrupt UTF-8, so a hostile terminal cannot
- * inject control sequences into reported values. */
+/* Replies are untrusted terminal input. Strip C0 controls, DEL and UTF-8
+ * encoded C1 controls (C2 80..C2 9F), so a hostile terminal cannot inject
+ * control sequences into reported values. Raw 0x80-0x9f bytes are kept as
+ * they may be part of other UTF-8 sequences. */
 static void strip_ctl_chars(char *s)
 {
     char *from,
@@ -677,7 +678,11 @@ static void strip_ctl_chars(char *s)
 
     for (from = to = s; *from; from++)
     {
-        if ((unsigned char)*from >= 0x20 && *from != 0x7f)
+        if ((unsigned char)from[0] == 0xc2 && (unsigned char)from[1] >= 0x80 && (unsigned char)from[1] <= 0x9f)
+        {
+            from++;
+        }
+        else if ((unsigned char)*from >= 0x20 && *from != 0x7f)
         {
             *to++ = *from;
         }

@@ -72,6 +72,7 @@ check_not_out() {
 esc=`printf '\033'`
 bel=`printf '\007'`
 st="$esc\\"
+c1csi=`printf '\302\233'`
 
 check "truncated title reply"    1 --get-title -- "${esc}]lhello"
 check "one-byte reply"           1 --get-title -- "$esc"
@@ -91,6 +92,10 @@ check_out "get-geometry"            0 '80x24+10+20'     --get-geometry -- "${esc
 
 check_not_out "get-title strips control chars" 0 'AB' 'A\eB' --get-title -- "${esc}]lA${esc}B$bel"
 check_not_out "get-bg strips control chars"    0 'rgb' 'rg\eb' --get-bg -- "${esc}]11;rg${esc}b$bel"
+check_not_out "get-title strips utf8 C1" 0 'X2Jhi' "$c1csi" \
+   --get-title -- "${esc}]lX${c1csi}2Jhi$bel"
+check_not_out "get-bg strips utf8 C1"    0 'rgb:ff' "$c1csi" \
+   --get-bg -- "${esc}]11;rgb:${c1csi}ff$bel"
 
 check_out "set bg emits osc"        0 '\e]11;white\e'   --bg=white --
 check_out "set color emits osc"     0 '\e]4;88;red\e'   --color88=red --
