@@ -12,6 +12,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -179,7 +180,7 @@ int main(int argc, char **argv)
             {
                 /* default ~/.program_name configuration file */
                 snprintf(configuration_file, sizeof(configuration_file), "%s/.%s", home, program_name);
-                if (configuration_read(&list, configuration_file) == -1)
+                if (configuration_read(&list, configuration_file) == -1 && errno == ENOENT)
                 {
                     configuration_missing = 1;
                 }
@@ -223,10 +224,7 @@ int main(int argc, char **argv)
 
     if (configuration_missing)
     {
-        if (configuration_write(configuration_file) < 0)
-        {
-            do_exit(EXIT_FAILURE);
-        }
+        configuration_write(configuration_file);
     }
 
     do_exit(failed ? EXIT_FAILURE : EXIT_SUCCESS);
@@ -300,7 +298,11 @@ static int process_ctlseq(unsigned int i, char *text, int verbose)
         break;
 
     case OSC:
-        osc_print(ctl1, ctl2, text);
+        if (osc_print(ctl1, ctl2, text) < 0)
+        {
+            fprintf(stderr, "%s: --%s: value too long\n", program_name, ctlseqstab[i].option);
+            return -1;
+        }
         break;
 
     case GET_OSC:
@@ -316,7 +318,11 @@ static int process_ctlseq(unsigned int i, char *text, int verbose)
         break;
 
     case ANY:
-        raw_print(text);
+        if (raw_print(text) < 0)
+        {
+            fprintf(stderr, "%s: --%s: value too long\n", program_name, ctlseqstab[i].option);
+            return -1;
+        }
         break;
 
     default:
@@ -483,22 +489,58 @@ static void on_signal(int sig)
 
 /*=****************************************************************************
 **
-** DESCRIPTION : issue raw escape sequence.
+** DESCRIPTION : write a control sequence to the terminal, wrapped for tmux
+**               passthrough if needed.
 **
 ** RETURN VALUE:
 **                                                                           */
 /*=***************************************************************************/
-void raw_print(char *ctlseq)
+void tty_write(const char *buf, size_t n)
+{
+    size_t i;
+
+    if (getenv("TMUX"))
+    {
+        fputs("\033Ptmux;", tty_out);
+        for (i = 0; i < n; i++)
+        {
+            if (buf[i] == '\033')
+            {
+                fputc('\033', tty_out);
+            }
+            fputc(buf[i], tty_out);
+        }
+        fputs("\033\\", tty_out);
+    }
+    else
+    {
+        fwrite(buf, 1, n, tty_out);
+    }
+
+    fflush(tty_out);
+}
+
+/*=****************************************************************************
+**
+** DESCRIPTION : issue raw escape sequence, expanding backslash escapes.
+**
+** RETURN VALUE: 0, or -1 if the expanded sequence does not fit the buffer
+**                                                                           */
+/*=***************************************************************************/
+int raw_print(char *ctlseq)
 {
     int c;
-    size_t n,
-        i;
+    size_t n;
     static char buf[BUFSIZ];
 
     n = 0;
 
-    while ((c = *ctlseq++) && n < sizeof(buf) - 1)
+    while ((c = *ctlseq++))
     {
+        if (n >= sizeof(buf) - 1)
+        {
+            return -1;
+        }
         if (c == '\\' && *ctlseq)
         {
             switch (c = *ctlseq++)
@@ -557,25 +599,9 @@ void raw_print(char *ctlseq)
         buf[n++] = c;
     }
 
-    if (getenv("TMUX"))
-    {
-        fputs("\033Ptmux;", tty_out);
-        for (i = 0; i < n; i++)
-        {
-            if (buf[i] == '\033')
-            {
-                fputc('\033', tty_out);
-            }
-            fputc(buf[i], tty_out);
-        }
-        fputs("\033\\", tty_out);
-    }
-    else
-    {
-        fwrite(buf, 1, n, tty_out);
-    }
+    tty_write(buf, n);
 
-    fflush(tty_out);
+    return 0;
 }
 
 /*=****************************************************************************
@@ -632,9 +658,10 @@ ssize_t tty_read(char *output, size_t size)
 void csi_print1(int ctl1)
 {
     char buf[BUFSIZ];
+    int len;
 
-    snprintf(buf, sizeof(buf), "\033[%dt", ctl1);
-    raw_print(buf);
+    len = snprintf(buf, sizeof(buf), "\033[%dt", ctl1);
+    tty_write(buf, len);
 }
 
 /*=****************************************************************************
@@ -647,9 +674,10 @@ void csi_print1(int ctl1)
 void csi_print2(int ctl1, int ctl2)
 {
     char buf[BUFSIZ];
+    int len;
 
-    snprintf(buf, sizeof(buf), "\033[%d;%dt", ctl1, ctl2);
-    raw_print(buf);
+    len = snprintf(buf, sizeof(buf), "\033[%d;%dt", ctl1, ctl2);
+    tty_write(buf, len);
 }
 
 /*=****************************************************************************
@@ -662,14 +690,16 @@ void csi_print2(int ctl1, int ctl2)
 void csi_print3(int ctl1, int ctl2, int ctl3)
 {
     char buf[BUFSIZ];
+    int len;
 
-    snprintf(buf, sizeof(buf), "\033[%d;%d;%dt", ctl1, ctl2, ctl3);
-    raw_print(buf);
+    len = snprintf(buf, sizeof(buf), "\033[%d;%d;%dt", ctl1, ctl2, ctl3);
+    tty_write(buf, len);
 }
 
-/* Replies are untrusted terminal input. Strip C0 controls and DEL, but not
- * C1 0x80-0x9f which would corrupt UTF-8, so a hostile terminal cannot
- * inject control sequences into reported values. */
+/* Replies are untrusted terminal input. Strip C0 controls, DEL and UTF-8
+ * encoded C1 controls (C2 80..C2 9F), so a hostile terminal cannot inject
+ * control sequences into reported values. Raw 0x80-0x9f bytes are kept as
+ * they may be part of other UTF-8 sequences. */
 static void strip_ctl_chars(char *s)
 {
     char *from,
@@ -677,7 +707,11 @@ static void strip_ctl_chars(char *s)
 
     for (from = to = s; *from; from++)
     {
-        if ((unsigned char)*from >= 0x20 && *from != 0x7f)
+        if ((unsigned char)from[0] == 0xc2 && (unsigned char)from[1] >= 0x80 && (unsigned char)from[1] <= 0x9f)
+        {
+            from++;
+        }
+        else if ((unsigned char)*from >= 0x20 && *from != 0x7f)
         {
             *to++ = *from;
         }
@@ -755,33 +789,41 @@ int get_title(char *title, size_t size, int verbose, int ctl1)
 ** RETURN VALUE:
 **                                                                           */
 /*=***************************************************************************/
-void osc_print(int ps1, int ps2, char *pt)
+int osc_print(int ps1, int ps2, char *pt)
 {
     char buf[BUFSIZ];
+    int len;
 
     if (pt && *pt)
     {
         if (ps1 == 4)
         {
             /* colorN */
-            snprintf(buf, sizeof(buf), "\033]%d;%d;%s\033\\", ps1, ps2, pt);
+            len = snprintf(buf, sizeof(buf), "\033]%d;%d;%s\033\\", ps1, ps2, pt);
         }
         else
         {
-            snprintf(buf, sizeof(buf), "\033]%d;%s\033\\", ps1, pt);
+            len = snprintf(buf, sizeof(buf), "\033]%d;%s\033\\", ps1, pt);
         }
     }
     else if (ps1 == 4)
     {
         /* colorN */
-        snprintf(buf, sizeof(buf), "\033]%d;%d;?\033\\", ps1, ps2);
+        len = snprintf(buf, sizeof(buf), "\033]%d;%d;?\033\\", ps1, ps2);
     }
     else
     {
-        snprintf(buf, sizeof(buf), "\033]%d;?\033\\", ps1);
+        len = snprintf(buf, sizeof(buf), "\033]%d;?\033\\", ps1);
     }
 
-    raw_print(buf);
+    if (len < 0 || (size_t)len >= sizeof(buf))
+    {
+        return -1;
+    }
+
+    tty_write(buf, len);
+
+    return 0;
 }
 
 /*=****************************************************************************
@@ -1089,11 +1131,16 @@ void version(void)
 int configuration_write(const char *filepath)
 {
     FILE *fp;
+    int fd;
 
-    fp = fopen(filepath, "w");
-    if (fp == NULL)
+    fd = open(filepath, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW, 0644);
+    if (fd == -1 || (fp = fdopen(fd, "w")) == NULL)
     {
-        perror("configuration_write");
+        fprintf(stderr, "%s: warning: %s: %s\n", program_name, filepath, strerror(errno));
+        if (fd != -1)
+        {
+            close(fd);
+        }
         return -1;
     }
 
